@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
         <VersionPrefix>0.0.0.2</VersionPrefix>
@@ -12,7 +11,16 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>
+
+        <NoWarn>1591</NoWarn>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="key.snk" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Castle.Core" Version="4.2.1" />
@@ -35,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Transports\gRPC\" />
+        <Folder Include="Transports\gRPC\" />
     </ItemGroup>
 
 </Project>

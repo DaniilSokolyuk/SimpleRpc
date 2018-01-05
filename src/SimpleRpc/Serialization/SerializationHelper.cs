@@ -7,8 +7,8 @@ namespace SimpleRpc.Serialization
 {
     public static class SerializationHelper
     {
-        private static readonly IDictionary<string, string> contentTypesToNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private static readonly IDictionary<string, IMessageSerializer> _serializers = new Dictionary<string, IMessageSerializer>(StringComparer.OrdinalIgnoreCase);
+        private static readonly IDictionary<string, IMessageSerializer> _contentTypeSerializer = new Dictionary<string, IMessageSerializer>(StringComparer.OrdinalIgnoreCase);
+        private static readonly IDictionary<string, IMessageSerializer> _nameSerializer = new Dictionary<string, IMessageSerializer>(StringComparer.OrdinalIgnoreCase);
 
         static SerializationHelper()
         {
@@ -16,19 +16,20 @@ namespace SimpleRpc.Serialization
             Add(new MsgPackSerializer());
         }
 
-        public static IMessageSerializer Add<T>(IMessageSerializer serializer) where T : class, IMessageSerializer
+        public static void Add(IMessageSerializer serializer)
         {
-            return _serializers[contentType];
+            _nameSerializer.Add(serializer.Name, serializer);
+            _contentTypeSerializer.Add(serializer.ContentType, serializer);
         }
 
         public static IMessageSerializer GetByName(string name)
         {
-            return _serializers[contentType];
+            return _nameSerializer[name];
         }
 
         public static IMessageSerializer GetByContentType(string contentType)
         {
-            return _serializers[contentType];
+            return _contentTypeSerializer[contentType];
         }
     }
 }
