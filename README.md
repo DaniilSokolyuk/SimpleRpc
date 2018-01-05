@@ -62,7 +62,7 @@ Transports
 Serializers
 ---
 
-| Serializer                      | Short name          
+| Serializer                      | Name (for client options)          
 | ------------------------------- |:----------:|
 | MessagePack (lz4 compression)   | msgpack    | 
 | Wire (lz4 compression)          | wire       |
