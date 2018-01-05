@@ -40,9 +40,9 @@ In your `Startup` class...
 ```C#
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/rpc"});
-    
     services.AddSingleton<IFooService, FooServiceImpl>();
+    
+    services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/rpc"});
 }
 
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -54,18 +54,18 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 Transports
 ---
 
-| Transport  | Client options            | Server options             |
-| ---------- |:-------------------------:|:--------------------------:|
-| HTTP       | HttpClientTransportOptions| HttpServerTransportOptions |
+| Transport  | Client options            | Server options             | Default serializer         |
+| ---------- |:-------------------------:|:--------------------------:|:--------------------------:|
+| HTTP       | HttpClientTransportOptions| HttpServerTransportOptions | MessagePack                |
 
 
 Serializers
 ---
 
-| Serializer                              | Short name          
-| --------------------------------------- |:----------:|
-| MessagePack (lz4 compression, default)  | msgpack    | 
-| Wire (lz4 compression)                  | wire       |
+| Serializer                      | Short name          
+| ------------------------------- |:----------:|
+| MessagePack (lz4 compression)   | msgpack    | 
+| Wire (lz4 compression)          | wire       |
 
 
 ---
