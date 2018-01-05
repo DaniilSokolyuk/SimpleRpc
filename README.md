@@ -61,7 +61,7 @@ Transports
 
 Serializers
 ---
-Default serializer can be changed `Serializer` property in any `*ClientTransportOptions`, for example
+Default serializer can be changed in any `*ClientTransportOptions` using the "Serializer" property, for example
 ```C#
 sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
 {
