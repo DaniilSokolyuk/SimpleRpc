@@ -2182,7 +2182,7 @@
           "lib/netstandard1.3/System.Xml.XmlDocument.dll": {}
         }
       },
-      "SimpleRpc/1.0.0": {
+      "SimpleRpc/0.0.0.1": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
@@ -6668,7 +6668,7 @@
         "system.xml.xmldocument.nuspec"
       ]
     },
-    "SimpleRpc/1.0.0": {
+    "SimpleRpc/0.0.0.1": {
       "type": "project",
       "path": "../../src/SimpleRpc/SimpleRpc.csproj",
       "msbuildProject": "../../src/SimpleRpc/SimpleRpc.csproj"
@@ -6683,7 +6683,7 @@
     ".NETCoreApp,Version=v2.0": [
       "Microsoft.AspNetCore >= 2.0.1",
       "Microsoft.NETCore.App >= 2.0.0",
-      "SimpleRpc >= 1.0.0",
+      "SimpleRpc >= 0.0.0.1",
       "SimpleRpc.Sample.Shared >= 1.0.0"
     ]
   },
