@@ -40,9 +40,9 @@ In your `Startup` class...
 ```
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddSingleton<IFooService, FooServiceImpl>();
-
     services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/rpc"});
+    
+    services.AddSingleton<IFooService, FooServiceImpl>();
 }
 
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
