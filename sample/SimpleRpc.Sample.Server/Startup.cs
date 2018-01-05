@@ -20,10 +20,9 @@ namespace SimpleRpc.Sample.Server
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSimpleRpcServer(new HttpServerTransportOptions { Path = "/rpc" });
 
             services.AddSingleton<IFooService, FooServiceImpl>();
-
-            services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/rpc"});
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
