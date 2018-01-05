@@ -18,7 +18,7 @@ namespace SimpleRpc.Sample.Client
 
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
             {
-                Url = "http://127.0.0.1:5000/rpc"                
+                Url = "http://127.0.0.1:5000/rpc"
             });
 
             sc.AddSimpleRpcProxy<IFooService>("sample");
@@ -30,7 +30,7 @@ namespace SimpleRpc.Sample.Client
             var service = pr.GetService<IFooService>();
 
 
-            service.Plus(1,5);
+            service.Plus(1, 5);
             Console.WriteLine(service.Concat("Foo", "Bar"));
 
             service.WriteFooAsync("TaskFoo", "TaskBar").GetAwaiter().GetResult();
