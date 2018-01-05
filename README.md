@@ -14,7 +14,7 @@ For .NET 4.6+, NET Standard 2 (.NET Core) available in NuGet
 Install-Package SimpleRpc
 ```
 
-Client
+### Client
 ```
 var sc = new ServiceCollection();
 
@@ -34,7 +34,7 @@ var service = pr.GetService<IFooService>();
 service.Plus(1,5);
 ```
 
-Server
+### Server
 
 In your `Startup` class...
 ```
