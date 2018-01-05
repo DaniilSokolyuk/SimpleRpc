@@ -4,7 +4,7 @@ SimpleRpc
 [![NuGet](https://img.shields.io/nuget/dt/SimpleRpc.svg)](https://www.nuget.org/packages/SimpleRpc)
 [![NuGet](https://img.shields.io/nuget/v/SimpleRpc.svg)](https://www.nuget.org/packages/SimpleRpc)
 
-A simple and fast RPC library for .NET, .NET Core, over [IServiceCollection](https://github.com/aspnet/DependencyInjection) (you can use any supported DI container)
+A simple and fast RPC library without contracts for .NET, .NET Core, over [IServiceCollection](https://github.com/aspnet/DependencyInjection) (you can use any supported DI container)
 
 Quick Start
 ---
