@@ -61,6 +61,14 @@ Transports
 
 Serializers
 ---
+Default serializer can be changed in `*ClientTransportOptions`
+```C#
+sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
+{
+    Url = "http://127.0.0.1:5000/rpc",
+    Serializer = "wire"
+});
+```
 
 | Serializer                      | Name (for client options)          
 | ------------------------------- |:----------:|
