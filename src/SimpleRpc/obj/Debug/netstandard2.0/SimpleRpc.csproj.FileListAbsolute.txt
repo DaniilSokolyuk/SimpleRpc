@@ -1,8 +1,0 @@
-C:\Work\SimpleRpc\src\SimpleRpc\bin\Debug\netstandard2.0\SimpleRpc.deps.json
-C:\Work\SimpleRpc\src\SimpleRpc\bin\Debug\netstandard2.0\SimpleRpc.dll
-C:\Work\SimpleRpc\src\SimpleRpc\bin\Debug\netstandard2.0\SimpleRpc.pdb
-C:\Work\SimpleRpc\src\SimpleRpc\obj\Debug\netstandard2.0\SimpleRpc.csproj.CoreCompileInputs.cache
-C:\Work\SimpleRpc\src\SimpleRpc\obj\Debug\netstandard2.0\SimpleRpc.AssemblyInfoInputs.cache
-C:\Work\SimpleRpc\src\SimpleRpc\obj\Debug\netstandard2.0\SimpleRpc.AssemblyInfo.cs
-C:\Work\SimpleRpc\src\SimpleRpc\obj\Debug\netstandard2.0\SimpleRpc.dll
-C:\Work\SimpleRpc\src\SimpleRpc\obj\Debug\netstandard2.0\SimpleRpc.pdb
