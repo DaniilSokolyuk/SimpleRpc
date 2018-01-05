@@ -15,7 +15,7 @@ Install-Package SimpleRpc
 ```
 
 ### Client
-```
+```C#
 var sc = new ServiceCollection();
 
 sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
@@ -37,7 +37,7 @@ service.Plus(1,5);
 ### Server
 
 In your `Startup` class...
-```
+```C#
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/rpc"});
