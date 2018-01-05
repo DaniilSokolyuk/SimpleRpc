@@ -35,6 +35,8 @@ service.Plus(1,5);
 ```
 
 Server
+
+In your `Startup` class...
 ```
 public void ConfigureServices(IServiceCollection services)
 {
