@@ -1,0 +1,9 @@
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\bin\Debug\netstandard2.0\SimpleRpc.Sample.Shared.deps.json
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\bin\Debug\netstandard2.0\SimpleRpc.Sample.Shared.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\bin\Debug\netstandard2.0\SimpleRpc.Sample.Shared.pdb
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.csprojResolveAssemblyReference.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.csproj.CoreCompileInputs.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.AssemblyInfoInputs.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.AssemblyInfo.cs
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Shared\obj\Debug\netstandard2.0\SimpleRpc.Sample.Shared.pdb

@@ -1,0 +1,15 @@
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.csprojResolveAssemblyReference.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.csproj.CoreCompileInputs.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.AssemblyInfoInputs.cache
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.AssemblyInfo.cs
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.deps.json
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.runtimeconfig.json
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.runtimeconfig.dev.json
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.pdb
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRPC.Sample.Shared.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRpc.pdb
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\bin\Debug\netcoreapp2.0\SimpleRPC.Sample.Shared.pdb
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.dll
+C:\Work\SimpleRpc\sample\SimpleRpc.Sample.Client\obj\Debug\netcoreapp2.0\SimpleRpc.Sample.Client.pdb

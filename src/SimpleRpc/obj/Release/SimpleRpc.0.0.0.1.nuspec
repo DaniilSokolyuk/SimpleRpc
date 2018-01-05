@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>SimpleRpc</id>
+    <version>0.0.0.1</version>
+    <authors>Daniil Sokolyuk</authors>
+    <owners>Daniil Sokolyuk</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An very simple RPC library.</description>
+    <tags>rpc simplerpc easyrpc easy simple</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.1">
+        <dependency id="Castle.Core" version="4.2.1" exclude="Build,Analyzers" />
+        <dependency id="Fasterflect.Netstandard" version="1.0.8" exclude="Build,Analyzers" />
+        <dependency id="MessagePack" version="1.7.3.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="2.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Castle.Core" version="4.2.1" exclude="Build,Analyzers" />
+        <dependency id="Fasterflect.Netstandard" version="1.0.8" exclude="Build,Analyzers" />
+        <dependency id="MessagePack" version="1.7.3.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.CSharp" version="4.4.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http" version="4.3.3" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.6.1" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="C:\Work\SimpleRpc\src\SimpleRpc\bin\Release\net461\SimpleRpc.dll" target="lib\net461\SimpleRpc.dll" />
+    <file src="C:\Work\SimpleRpc\src\SimpleRpc\bin\Release\net461\SimpleRpc.xml" target="lib\net461\SimpleRpc.xml" />
+    <file src="C:\Work\SimpleRpc\src\SimpleRpc\bin\Release\netstandard2.0\SimpleRpc.dll" target="lib\netstandard2.0\SimpleRpc.dll" />
+    <file src="C:\Work\SimpleRpc\src\SimpleRpc\bin\Release\netstandard2.0\SimpleRpc.xml" target="lib\netstandard2.0\SimpleRpc.xml" />
+  </files>
+</package>
