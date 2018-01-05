@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Description>An very simple RPC library.</Description>
-        <VersionPrefix>0.0.0.1</VersionPrefix>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
+        <VersionPrefix>0.0.0.2</VersionPrefix>
         <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
         <Authors>Daniil Sokolyuk</Authors>
-        
+        <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/DaniilSokolyuk/SimpleRpc</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     </PropertyGroup>

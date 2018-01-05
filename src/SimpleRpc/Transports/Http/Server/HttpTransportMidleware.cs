@@ -28,7 +28,7 @@ namespace SimpleRpc.Transports.Http.Server
             {
                 try
                 {
-                    var serializer = SerializationHelper.GetSerializer(context.Request.ContentType);
+                    var serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
                     context.Response.ContentType = serializer.ContentType;
 
                     var rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
@@ -46,7 +46,7 @@ namespace SimpleRpc.Transports.Http.Server
                 }
                 catch (Exception ex)
                 {
-                    var serializer = SerializationHelper.GetSerializer(Constants.ContentTypes.MessagePack);
+                    var serializer = SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack);
                     context.Response.ContentType = serializer.ContentType;
 
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

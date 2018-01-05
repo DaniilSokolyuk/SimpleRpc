@@ -19,7 +19,7 @@ namespace SimpleRpc.Transports.Http.Client
         {
             var url = new Uri(options.Url);
 
-            _serializer = SerializationHelper.GetSerializer(options.Serializer);
+            _serializer = SerializationHelper.GetByName(options.Serializer);
 
             _httpClient = new HttpClient
             {
@@ -67,7 +67,7 @@ namespace SimpleRpc.Transports.Http.Client
 
                 using (var httpResponseMessage = await _httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
                 {
-                    var resultSerializer = SerializationHelper.GetSerializer(httpResponseMessage.Content.Headers.ContentType.MediaType);
+                    var resultSerializer = SerializationHelper.GetByContentType(httpResponseMessage.Content.Headers.ContentType.MediaType);
                     var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
 
                     switch (httpResponseMessage.StatusCode)

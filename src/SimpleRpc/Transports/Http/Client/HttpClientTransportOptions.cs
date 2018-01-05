@@ -11,6 +11,6 @@ namespace SimpleRpc.Transports.Http.Client
 
         public IDictionary<string, string> DefaultRequestHeaders { get; set; }
 
-        public string Serializer { get; set; } = Constants.ContentTypes.MessagePack;
+        public string Serializer { get; set; } = Constants.DefaultSerializers.MessagePack;
     }
 }

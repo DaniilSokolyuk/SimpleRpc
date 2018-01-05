@@ -33,7 +33,9 @@ namespace SimpleRpc.Serialization.MsgPack
             _resolver = CompositeResolver.Instance;
         }
 
-        public string ContentType => Constants.ContentTypes.MessagePack;
+        public string Name => Constants.DefaultSerializers.MessagePack;
+
+        public string ContentType => "application/x-msgpack";
 
         public void Serialize(object message, Stream stream, Type type)
         {

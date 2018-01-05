@@ -14,7 +14,9 @@ namespace SimpleRpc.Serialization.Wire
             _serializer = new Serializer();
         }
 
-        public string ContentType => Constants.ContentTypes.Wire;
+        public string Name => Constants.DefaultSerializers.Wire;
+
+        public string ContentType => "application/x-wire";
 
         public void Serialize(object message, Stream stream, Type type)
         {

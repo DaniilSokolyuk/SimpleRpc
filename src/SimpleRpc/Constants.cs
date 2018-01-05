@@ -7,11 +7,11 @@
             public static string ApplicationName = "AppName";
         }
 
-        public static class ContentTypes
+        public static class DefaultSerializers
         {
-            public static string Wire = "application/x-wire";
+            public static string Wire = "wire";
 
-            public static string MessagePack = "application/x-msgpack";
+            public static string MessagePack = "msgpack";
         }
     }
 }
