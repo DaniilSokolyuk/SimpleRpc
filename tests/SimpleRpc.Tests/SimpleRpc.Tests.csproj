@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="AutoFixture" Version="4.0.0-rc1" />
+        <PackageReference Include="AutoFixture.AutoNSubstitute" Version="4.0.0-rc1" />
+        <PackageReference Include="AutoFixture.NUnit3" Version="4.0.0-rc1" />
+        <PackageReference Include="FluentAssertions" Version="5.0.0-beta0004" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.0.1" />
+        <PackageReference Include="NSubstitute" Version="3.1.0" />
+
+        <PackageReference Include="NUnit" Version="3.9.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\SimpleRpc\SimpleRpc.csproj" />
+    </ItemGroup>
+
+</Project>
