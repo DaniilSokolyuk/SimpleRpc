@@ -1,4 +1,5 @@
 ﻿using System;
+using Fasterflect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SimpleRpc.Transports.Abstractions.Client;
@@ -13,7 +14,22 @@ namespace SimpleRpc.Transports
             string clientName,
             IClientTransportOptions<T> clientTransportOptions) where T : class, IClientTransport
         {
-            ClientConfiguration.Register(clientName, clientTransportOptions);
+            if (string.IsNullOrEmpty(clientName))
+            {
+                throw new ArgumentNullException(nameof(clientName));
+            }
+
+            if (clientTransportOptions == null)
+            {
+                throw new ArgumentNullException(nameof(clientTransportOptions));
+            }
+
+            services.TryAddSingleton<IClientConfigurationManager, ClientConfigurationManager>();
+            services.AddSingleton(new ClientConfiguration
+            {
+                Name = clientName,
+                Transport = (IClientTransport)typeof(T).CreateInstance(clientTransportOptions)
+            });
 
             return services;
         }
@@ -27,12 +43,22 @@ namespace SimpleRpc.Transports
 
         public static IServiceCollection AddSimpleRpcProxy(this IServiceCollection services, Type interfaceToProxy, string clientName)
         {
+            if (string.IsNullOrEmpty(clientName))
+            {
+                throw new ArgumentNullException(nameof(clientName));
+            }
+
+            if (interfaceToProxy == null)
+            {
+                throw new ArgumentNullException(nameof(interfaceToProxy));
+            }
+
             if (!interfaceToProxy.IsInterface)
             {
                 throw new NotSupportedException("You can use AddSimpleRpcProxy only on interfaces");
             }
 
-            services.TryAddSingleton(interfaceToProxy, sp => ClientConfiguration.Get(clientName).BuildProxy(interfaceToProxy));
+            services.TryAddSingleton(interfaceToProxy, sp => sp.GetService<IClientConfigurationManager>().Get(clientName).BuildProxy(interfaceToProxy));
 
             return services;
         }
@@ -41,6 +67,11 @@ namespace SimpleRpc.Transports
             this IServiceCollection services,
             IServerTransportOptions<T> serverTransportOptions) where T : class, IServerTransport, new()
         {
+            if (serverTransportOptions == null)
+            {
+                throw new ArgumentNullException(nameof(serverTransportOptions));
+            }
+
             var serverTransport = new T();
 
             services.AddSingleton<IServerTransport>(serverTransport);
