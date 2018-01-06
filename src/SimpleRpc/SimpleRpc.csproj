@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
-        <VersionPrefix>0.0.0.2</VersionPrefix>
+        <VersionPrefix>0.0.0.3</VersionPrefix>
         <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
         <Authors>Daniil Sokolyuk</Authors>
         <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
