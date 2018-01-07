@@ -1,5 +1,6 @@
 SimpleRpc
 ===
+[![Build status](https://ci.appveyor.com/api/projects/status/github/DaniilSokolyuk/SimpleRpc?svg=true)](https://ci.appveyor.com/project/DaniilSokolyuk/simplerpc/branch/master)
 [![License](https://img.shields.io/badge/license-apache%202.0-60C060.svg)](https://github.com/DaniilSokolyuk/SimpleRpc/blob/master/LICENSE)
 [![NuGet](https://img.shields.io/nuget/dt/SimpleRpc.svg)](https://www.nuget.org/packages/SimpleRpc)
 [![NuGet](https://img.shields.io/nuget/v/SimpleRpc.svg)](https://www.nuget.org/packages/SimpleRpc)
