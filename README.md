@@ -52,6 +52,10 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 }
 ```
 
+Sample Projects
+---
+[Samples](https://github.com/DaniilSokolyuk/SimpleRpc/tree/master/sample) contains examples for using of SimpleRpc
+
 Transports
 ---
 
