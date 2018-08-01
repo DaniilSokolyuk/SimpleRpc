@@ -4,11 +4,8 @@ namespace SimpleRpc
 {
     public class RpcException : Exception
     {
-        public RpcException(RpcError rpcError)
+        public RpcException(RpcError rpcError) : base($"RPC server exception: {rpcError.Code.ToString()}", rpcError.Exception)
         {
-            RpcError = rpcError;
         }
-
-        public RpcError RpcError { get; }
     }
 }

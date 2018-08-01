@@ -13,7 +13,11 @@ namespace SimpleRpc.Transports.Http.Server
         private readonly IServiceProvider _serviceProvider;
         private readonly HttpServerTransportOptions _httpServerTransportOptions;
 
-        public HttpTransportMidleware(RequestDelegate next, ILogger<HttpTransportMidleware> logger, IServiceProvider serviceProvider, HttpServerTransportOptions httpServerTransportOptions)
+        public HttpTransportMidleware(
+            RequestDelegate next, 
+            ILogger<HttpTransportMidleware> logger, 
+            IServiceProvider serviceProvider, 
+            HttpServerTransportOptions httpServerTransportOptions)
         {
             _next = next;
             _logger = logger;
@@ -23,30 +27,23 @@ namespace SimpleRpc.Transports.Http.Server
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path == _httpServerTransportOptions.Path)
+            if (context.Request.Path != _httpServerTransportOptions.Path)
+            {
+                await _next(context);
+            }
+            else
             {
                 var rpcRequest = (RpcRequest)null;
                 var rpcError = (RpcError)null;
-                var serializer = (IMessageSerializer)null;
                 var result = (object)null;
+                var serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
 
-                try
+                if (serializer == null)
                 {
-                    serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
+                    rpcError = new RpcError { Code = RpcErrorCode.NotSupportedContentType };
+                    _logger.LogError(rpcError.Code.ToString(), context.Request.ContentType);
                 }
-                catch (Exception e)
-                {
-                    rpcError = new RpcError
-                    {
-                        Code = 100,
-                        Message = "Not supported ContentType",
-                        Data = context.Request.ContentType
-                    };
-
-                    _logger.LogError(e, "Not supported ContentType", context.Request.ContentType);
-                }
-
-                if (serializer != null)
+                else
                 {
                     try
                     {
@@ -56,12 +53,11 @@ namespace SimpleRpc.Transports.Http.Server
                     {
                         rpcError = new RpcError
                         {
-                            Code = 101,
-                            Message = "Error on RpcRequest deserialization",
-                            Data = e
+                            Code = RpcErrorCode.IncorrectRequestBodyFormat,
+                            Exception = e,
                         };
 
-                        _logger.LogError(e, "Error on RpcRequest deserialization");
+                        _logger.LogError(e, rpcError.Code.ToString());
                     }
                 }
 
@@ -75,12 +71,11 @@ namespace SimpleRpc.Transports.Http.Server
                     {
                         rpcError = new RpcError
                         {
-                            Code = 102,
-                            Message = "Error on RPC method invokation",
-                            Data = e
+                            Code = RpcErrorCode.RemoteMethodInvocation,
+                            Exception = e,
                         };
 
-                        _logger.LogError(e, "Error on RPC method invokation", rpcRequest);
+                        _logger.LogError(e, rpcError.Code.ToString(), rpcRequest);
                     }
                 }
 
@@ -98,10 +93,6 @@ namespace SimpleRpc.Transports.Http.Server
                     },
                     context.Response.Body,
                     typeof(RpcResponse));
-            }
-            else
-            {
-                await _next(context);
             }
         }
     }

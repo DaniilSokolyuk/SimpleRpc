@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using System;
+using MessagePack;
 
 namespace SimpleRpc
 {
@@ -10,20 +11,13 @@ namespace SimpleRpc
         /// </summary>
         /// <value>The code.</value>
         [Key(0)]
-        public int Code { get; set; }
-
-        /// <summary>
-        /// Gets or sets the error message.
-        /// </summary>
-        /// <value>The message.</value>
-        [Key(1)]
-        public string Message { get; set; }
+        public RpcErrorCode Code { get; set; }
 
         /// <summary>
         /// Gets or sets any server/method specific data provided about the error.
         /// </summary>
         /// <value>The data.</value>
-        [Key(2)]
-        public object Data { get; set; }
+        [Key(1)]
+        public Exception Exception { get; set; }
     }
 }
