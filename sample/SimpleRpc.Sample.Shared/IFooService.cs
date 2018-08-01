@@ -14,10 +14,6 @@ namespace SimpleRpc.Sample.Shared
 
         Task<string> ReturnGenericTypeAsString<T>();
 
-        Task<T> GetFooGenericReturn<T>();
-
-        Task<string> ArgsToStringAndReturn<T, TT>(T arg, TT arg2);
-
-        Task<TOut> GetFooGenericReturnWithArg<T, TT, TOut>(T arg, TT arg2);
+        Task<T> ThrowException<T>();
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using SimpleRpc.Sample.Shared;
 
@@ -36,19 +34,9 @@ namespace SimpleRPC.Sample.Server
             return typeof(T).ToString();
         }
 
-        public Task<T> GetFooGenericReturn<T>()
+        public Task<T> ThrowException<T>()
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> ArgsToStringAndReturn<T, TT>(T arg, TT arg2)
-        {
-            return Task.FromResult(arg.ToString() + arg2);
-        }
-
-        public Task<TOut> GetFooGenericReturnWithArg<T, TT, TOut>(T arg, TT arg2)
-        {
-            throw new NotImplementedException();
+            throw new ArgumentException("THIS IS EXCEPTION MESSAGE!!!");
         }
     }
 }

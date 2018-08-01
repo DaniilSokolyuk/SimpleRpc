@@ -37,6 +37,15 @@ namespace SimpleRpc.Sample.Client
             Console.WriteLine(service.ReturnGenericTypeAsString<ICollection<string>>().GetAwaiter().GetResult());
 
 
+            try
+            {
+                service.ThrowException<object>().GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             Console.ReadLine();
         }
     }
