@@ -24,12 +24,14 @@ namespace SimpleRpc.Serialization
 
         public static IMessageSerializer GetByName(string name)
         {
-            return _nameSerializer[name];
+            _nameSerializer.TryGetValue(name, out var serializer);
+            return serializer;
         }
 
         public static IMessageSerializer GetByContentType(string contentType)
         {
-            return _contentTypeSerializer[contentType];
+            _contentTypeSerializer.TryGetValue(contentType, out var serializer);
+            return serializer;
         }
     }
 }

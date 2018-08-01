@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using SimpleRpc.Serialization;
@@ -38,51 +39,63 @@ namespace SimpleRpc.Transports.Http.Client
             _httpClient.DefaultRequestHeaders.Host = url.Host;
         }
 
-        public override object HandleSync(RpcRequest rpcRequest)
-        {
-            return SendRequest(rpcRequest).ConfigureAwait(false).GetAwaiter().GetResult();
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override object HandleSync(RpcRequest rpcRequest) => SendRequest<object>(rpcRequest).ConfigureAwait(false).GetAwaiter().GetResult();
 
-        public override async Task HandleAsync(RpcRequest rpcRequest)
-        {
-            await SendRequest(rpcRequest).ConfigureAwait(false);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override Task HandleAsync(RpcRequest rpcRequest) => SendRequest<object>(rpcRequest);
 
-        public override async Task<T> HandleAsyncWithResult<T>(RpcRequest rpcRequest)
-        {
-            var result = await SendRequest(rpcRequest).ConfigureAwait(false);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override Task<T> HandleAsyncWithResult<T>(RpcRequest rpcRequest) => SendRequest<T>(rpcRequest);
 
-            return (T)result;
-        }
-
-        private async Task<object> SendRequest(RpcRequest rpcRequest)
+        private async Task<T> SendRequest<T>(RpcRequest rpcRequest)
         {
-            using (var memoryStream = new MemoryStream())
+            var streamContent = new SerializbleContent(_serializer, rpcRequest);
+
+            using (var httpResponseMessage = await _httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
             {
-                _serializer.Serialize(rpcRequest, memoryStream, typeof(RpcRequest));
-                memoryStream.Position = 0;
+                httpResponseMessage.EnsureSuccessStatusCode();
 
-                var streamContent = new StreamContent(memoryStream);
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue(_serializer.ContentType);
+                var resultSerializer = SerializationHelper.GetByContentType(httpResponseMessage.Content.Headers.ContentType.MediaType);
+                var stream = await httpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                using (var httpResponseMessage = await _httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
+                var result = (RpcResponse)resultSerializer.Deserialize(stream, typeof(RpcResponse));
+
+                if (result.Error != null)
                 {
-                    var resultSerializer = SerializationHelper.GetByContentType(httpResponseMessage.Content.Headers.ContentType.MediaType);
-                    var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
-
-                    switch (httpResponseMessage.StatusCode)
-                    {
-                        case HttpStatusCode.OK:
-                            return resultSerializer.Deserialize(stream, typeof(object));
-                        case HttpStatusCode.NoContent:
-                            return null;
-                        case HttpStatusCode.InternalServerError:
-                            throw (Exception)resultSerializer.Deserialize(stream, typeof(Exception));
-                        default:
-                            throw new ArgumentException($"Not support HttpStatusCode: {httpResponseMessage.StatusCode}");
-                    }
+                    throw new RpcException(result.Error);
                 }
+
+                return (T)result.Result;
             }
         }
     }
+
+    internal class SerializbleContent : HttpContent
+    {
+        private readonly IMessageSerializer _serializer;
+        private readonly RpcRequest _request;
+
+        public SerializbleContent(IMessageSerializer serializer, RpcRequest request)
+        {
+            _serializer = serializer;
+            _request = request;
+
+            Headers.ContentType = new MediaTypeHeaderValue(_serializer.ContentType);
+        }
+
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        {
+            _serializer.Serialize(_request, stream, typeof(RpcRequest));
+            return Task.CompletedTask;
+        }
+
+        protected override bool TryComputeLength(out long length)
+        {
+            //we don't know. can't be computed up-front
+            length = -1;
+            return false;
+        }
+    }
+
 }

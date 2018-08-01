@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,11 @@ namespace SimpleRpc.Transports.Http.Server
         private readonly IServiceProvider _serviceProvider;
         private readonly HttpServerTransportOptions _httpServerTransportOptions;
 
-        public HttpTransportMidleware(RequestDelegate next, ILogger<HttpTransportMidleware> logger, IServiceProvider serviceProvider, HttpServerTransportOptions httpServerTransportOptions)
+        public HttpTransportMidleware(
+            RequestDelegate next, 
+            ILogger<HttpTransportMidleware> logger, 
+            IServiceProvider serviceProvider, 
+            HttpServerTransportOptions httpServerTransportOptions)
         {
             _next = next;
             _logger = logger;
@@ -24,41 +27,72 @@ namespace SimpleRpc.Transports.Http.Server
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path == _httpServerTransportOptions.Path)
+            if (context.Request.Path != _httpServerTransportOptions.Path)
             {
-                try
-                {
-                    var serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
-                    context.Response.ContentType = serializer.ContentType;
-
-                    var rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
-
-                    var result = await rpcRequest.Invoke(_serviceProvider);
-                    if (result != null)
-                    {
-                        context.Response.StatusCode = (int)HttpStatusCode.OK;
-                        serializer.Serialize(result, context.Response.Body, typeof(object));
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = (int) HttpStatusCode.NoContent;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var serializer = SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack);
-                    context.Response.ContentType = serializer.ContentType;
-
-                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                    serializer.Serialize(ex, context.Response.Body, typeof(Exception));
-
-                    _logger.LogError(ex, "Rpc process error");
-                }
+                await _next(context);
             }
             else
             {
-                await _next(context);
+                var rpcRequest = (RpcRequest)null;
+                var rpcError = (RpcError)null;
+                var result = (object)null;
+                var serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
+
+                if (serializer == null)
+                {
+                    rpcError = new RpcError { Code = RpcErrorCode.NotSupportedContentType };
+                    _logger.LogError(rpcError.Code.ToString(), context.Request.ContentType);
+                }
+                else
+                {
+                    try
+                    {
+                        rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
+                    }
+                    catch (Exception e)
+                    {
+                        rpcError = new RpcError
+                        {
+                            Code = RpcErrorCode.IncorrectRequestBodyFormat,
+                            Exception = e,
+                        };
+
+                        _logger.LogError(e, rpcError.Code.ToString());
+                    }
+                }
+
+                if (rpcRequest != null)
+                {
+                    try
+                    {
+                        result = await rpcRequest.Invoke(_serviceProvider);
+                    }
+                    catch (Exception e)
+                    {
+                        rpcError = new RpcError
+                        {
+                            Code = RpcErrorCode.RemoteMethodInvocation,
+                            Exception = e,
+                        };
+
+                        _logger.LogError(e, rpcError.Code.ToString(), rpcRequest);
+                    }
+                }
+
+                if (rpcError != null)
+                {
+                    serializer = SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack);
+                }
+
+                context.Response.ContentType = serializer.ContentType;
+                serializer.Serialize(
+                    new RpcResponse
+                    {
+                        Result = result,
+                        Error = rpcError
+                    },
+                    context.Response.Body,
+                    typeof(RpcResponse));
             }
         }
     }

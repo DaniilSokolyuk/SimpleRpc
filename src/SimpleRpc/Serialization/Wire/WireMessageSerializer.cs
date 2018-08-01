@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using MessagePack;
+using LZ4;
 using SimpleRpc.Serialization.Wire.Library;
 
 namespace SimpleRpc.Serialization.Wire
@@ -20,25 +20,17 @@ namespace SimpleRpc.Serialization.Wire
 
         public void Serialize(object message, Stream stream, Type type)
         {
-            using (var memStream = new MemoryStream())
+            using (var lz4Stream = new LZ4Stream(stream, LZ4StreamMode.Compress, LZ4StreamFlags.IsolateInnerStream))
             {
-                _serializer.Serialize(message, memStream);
-
-                memStream.TryGetBuffer(out var buffer);
-
-                var lz4Buffer = LZ4MessagePackSerializer.ToLZ4Binary(buffer);
-
-                stream.Write(lz4Buffer, 0, lz4Buffer.Length);
+                _serializer.Serialize(message, lz4Stream);
             }
         }
 
         public object Deserialize(Stream stream, Type type)
         {
-            var bytes = LZ4MessagePackSerializer.Decode(stream);
-
-            using (var memStream = new MemoryStream(bytes))
+            using (var lz4Stream = new LZ4Stream(stream, LZ4StreamMode.Decompress))
             {
-                return _serializer.Deserialize(memStream);
+                return _serializer.Deserialize(lz4Stream);
             }
         }
     }
