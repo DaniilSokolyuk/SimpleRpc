@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -26,35 +25,79 @@ namespace SimpleRpc.Transports.Http.Server
         {
             if (context.Request.Path == _httpServerTransportOptions.Path)
             {
+                var rpcRequest = (RpcRequest)null;
+                var rpcError = (RpcError)null;
+                var serializer = (IMessageSerializer)null;
+                var result = (object)null;
+
                 try
                 {
-                    var serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
-                    context.Response.ContentType = serializer.ContentType;
-
-                    var rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
-
-                    var result = await rpcRequest.Invoke(_serviceProvider);
-                    if (result != null)
-                    {
-                        context.Response.StatusCode = (int)HttpStatusCode.OK;
-                        serializer.Serialize(result, context.Response.Body, typeof(object));
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = (int) HttpStatusCode.NoContent;
-                    }
+                    serializer = SerializationHelper.GetByContentType(context.Request.ContentType);
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    var serializer = SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack);
-                    context.Response.ContentType = serializer.ContentType;
+                    rpcError = new RpcError
+                    {
+                        Code = 100,
+                        Message = "Not supported ContentType",
+                        Data = context.Request.ContentType
+                    };
 
-                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                    serializer.Serialize(ex, context.Response.Body, typeof(Exception));
-
-                    _logger.LogError(ex, "Rpc process error");
+                    _logger.LogError(e, "Not supported ContentType", context.Request.ContentType);
                 }
+
+                if (serializer != null)
+                {
+                    try
+                    {
+                        rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
+                    }
+                    catch (Exception e)
+                    {
+                        rpcError = new RpcError
+                        {
+                            Code = 101,
+                            Message = "Error on RpcRequest deserialization",
+                            Data = e
+                        };
+
+                        _logger.LogError(e, "Error on RpcRequest deserialization");
+                    }
+                }
+
+                if (rpcRequest != null)
+                {
+                    try
+                    {
+                        result = await rpcRequest.Invoke(_serviceProvider);
+                    }
+                    catch (Exception e)
+                    {
+                        rpcError = new RpcError
+                        {
+                            Code = 102,
+                            Message = "Error on RPC method invokation",
+                            Data = e
+                        };
+
+                        _logger.LogError(e, "Error on RPC method invokation", rpcRequest);
+                    }
+                }
+
+                if (rpcError != null)
+                {
+                    serializer = SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack);
+                }
+
+                context.Response.ContentType = serializer.ContentType;
+                serializer.Serialize(
+                    new RpcResponse
+                    {
+                        Result = result,
+                        Error = rpcError
+                    },
+                    context.Response.Body,
+                    typeof(RpcResponse));
             }
             else
             {

@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleRpc.Sample.Shared;
 using SimpleRpc.Transports;
-using SimpleRpc.Transports.Abstractions.Client;
-using SimpleRpc.Transports.Http;
 using SimpleRpc.Transports.Http.Client;
-using SimpleRpc.Transports.Http.Server;
 
 namespace SimpleRpc.Sample.Client
 {
@@ -18,7 +15,8 @@ namespace SimpleRpc.Sample.Client
 
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
             {
-                Url = "http://127.0.0.1:5000/rpc"
+                Url = "http://127.0.0.1:5000/rpc",
+            //    Serializer = "wire"
             });
 
             sc.AddSimpleRpcProxy<IFooService>("sample");

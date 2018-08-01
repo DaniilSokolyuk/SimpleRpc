@@ -18,7 +18,12 @@ namespace SimpleRpc
             GenericArguments = genericArguments;
         }
 
-        public MethodModel(MethodInfo method, Type[] genericArguments) : this(method.DeclaringType, method.Name, method.GetParameters().Select(t => t.ParameterType).ToArray(), genericArguments)
+        public MethodModel(MethodInfo method, Type[] genericArguments) :
+            this(
+                method.DeclaringType,
+                method.Name,
+                method.GetParameters().Select(t => t.ParameterType).ToArray(),
+                genericArguments)
         {
         }
 
