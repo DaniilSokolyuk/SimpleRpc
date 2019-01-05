@@ -56,14 +56,6 @@ Sample Projects
 ---
 [Samples](https://github.com/DaniilSokolyuk/SimpleRpc/tree/master/sample) contains examples for using of SimpleRpc
 
-Transports
----
-
-| Transport  | Client options            | Server options             | Default serializer         |
-| ---------- |:-------------------------:|:--------------------------:|:--------------------------:|
-| HTTP       | HttpClientTransportOptions| HttpServerTransportOptions | MessagePack                |
-
-
 Serializers
 ---
 Default serializer can be changed in any `*ClientTransportOptions` using the `Serializer` property, for example

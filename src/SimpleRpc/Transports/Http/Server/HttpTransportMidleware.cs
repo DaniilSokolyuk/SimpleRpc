@@ -10,18 +10,15 @@ namespace SimpleRpc.Transports.Http.Server
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<HttpTransportMidleware> _logger;
-        private readonly IServiceProvider _serviceProvider;
         private readonly HttpServerTransportOptions _httpServerTransportOptions;
 
         public HttpTransportMidleware(
             RequestDelegate next, 
             ILogger<HttpTransportMidleware> logger, 
-            IServiceProvider serviceProvider, 
             HttpServerTransportOptions httpServerTransportOptions)
         {
             _next = next;
             _logger = logger;
-            _serviceProvider = serviceProvider;
             _httpServerTransportOptions = httpServerTransportOptions;
         }
 
@@ -65,7 +62,7 @@ namespace SimpleRpc.Transports.Http.Server
                 {
                     try
                     {
-                        result = await rpcRequest.Invoke(_serviceProvider);
+                        result = await rpcRequest.Invoke(context.RequestServices);
                     }
                     catch (Exception e)
                     {
