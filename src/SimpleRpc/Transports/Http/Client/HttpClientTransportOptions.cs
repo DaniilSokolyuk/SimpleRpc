@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using SimpleRpc.Transports.Abstractions.Client;
 
 namespace SimpleRpc.Transports.Http.Client
 {
-    public class HttpClientTransportOptions : IClientTransportOptions<HttpClientTransport>
+    public class HttpClientTransportOptions
     {
         public string Url { get; set; }
 

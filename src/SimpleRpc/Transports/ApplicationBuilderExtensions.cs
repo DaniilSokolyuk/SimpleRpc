@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using SimpleRpc.Transports.Abstractions.Server;
 using Microsoft.Extensions.DependencyInjection;
+using SimpleRpc.Transports.Abstractions.Server;
 
 namespace SimpleRpc.Transports
 {
