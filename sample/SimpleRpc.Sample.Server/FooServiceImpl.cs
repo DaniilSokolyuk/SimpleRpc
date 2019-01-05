@@ -36,7 +36,7 @@ namespace SimpleRPC.Sample.Server
 
         public Task<T> ThrowException<T>()
         {
-            throw new ArgumentException("THIS IS EXCEPTION MESSAGE!!!");
+            throw new ArgumentException("This is an expected error message!!!");
         }
     }
 }

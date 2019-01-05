@@ -13,30 +13,15 @@ namespace SimpleRpc.Transports.Http.Client
 {
     public class HttpClientTransport : BaseClientTransport
     {
-        private readonly HttpClient _httpClient;
+        private readonly string _clientName;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMessageSerializer _serializer;
 
-        public HttpClientTransport(HttpClientTransportOptions options)
+        public HttpClientTransport(string clientName, IMessageSerializer serializer, IHttpClientFactory httpClientFactory)
         {
-            var url = new Uri(options.Url);
-
-            _serializer = SerializationHelper.GetByName(options.Serializer);
-
-            _httpClient = new HttpClient
-            {
-                BaseAddress = url
-            };
-
-            if (options.DefaultRequestHeaders != null)
-            {
-                foreach (var header in options.DefaultRequestHeaders)
-                {
-                    _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
-                }
-            }
-            _httpClient.DefaultRequestHeaders.Add(Constants.Other.ApplicationName, options.ApplicationName);
-            _httpClient.DefaultRequestHeaders.ConnectionClose = false;
-            _httpClient.DefaultRequestHeaders.Host = url.Host;
+            _clientName = clientName;
+            _httpClientFactory = httpClientFactory;
+            _serializer = serializer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,9 +35,9 @@ namespace SimpleRpc.Transports.Http.Client
 
         private async Task<T> SendRequest<T>(RpcRequest rpcRequest)
         {
-            var streamContent = new SerializbleContent(_serializer, rpcRequest);
-
-            using (var httpResponseMessage = await _httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
+            using (var streamContent = new SerializbleContent(_serializer, rpcRequest))
+            using (var httpClient = _httpClientFactory.CreateClient(_clientName))
+            using (var httpResponseMessage = await httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
             {
                 httpResponseMessage.EnsureSuccessStatusCode();
 

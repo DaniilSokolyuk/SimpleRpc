@@ -1,34 +1,54 @@
 ﻿using System;
-using Fasterflect;
+using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SimpleRpc.Serialization;
 using SimpleRpc.Transports.Abstractions.Client;
 using SimpleRpc.Transports.Abstractions.Server;
+using SimpleRpc.Transports.Http.Client;
 
 namespace SimpleRpc.Transports
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSimpleRpcClient<T>(
+        public static IServiceCollection AddSimpleRpcClient(
             this IServiceCollection services,
             string clientName,
-            IClientTransportOptions<T> clientTransportOptions) where T : class, IClientTransport
+            HttpClientTransportOptions options,
+            Action<IHttpClientBuilder> httpclientBuilder = null)
         {
             if (string.IsNullOrEmpty(clientName))
             {
                 throw new ArgumentNullException(nameof(clientName));
             }
 
-            if (clientTransportOptions == null)
+            if (options == null)
             {
-                throw new ArgumentNullException(nameof(clientTransportOptions));
+                throw new ArgumentNullException(nameof(options));
             }
 
+            var clientBuilder = services.AddHttpClient(clientName, client => {
+                var url = new Uri(options.Url);
+                client.BaseAddress = url;
+
+                if (options.DefaultRequestHeaders != null)
+                {
+                    foreach (var header in options.DefaultRequestHeaders)
+                    {
+                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                    }
+                }
+                client.DefaultRequestHeaders.Add(Constants.Other.ApplicationName, options.ApplicationName);
+                client.DefaultRequestHeaders.ConnectionClose = false;
+                client.DefaultRequestHeaders.Host = url.Host;
+            });
+            httpclientBuilder?.Invoke(clientBuilder);
+
             services.TryAddSingleton<IClientConfigurationManager, ClientConfigurationManager>();
-            services.AddSingleton(new ClientConfiguration
+            services.AddSingleton(sp => new ClientConfiguration
             {
                 Name = clientName,
-                Transport = (IClientTransport)typeof(T).CreateInstance(clientTransportOptions)
+                Transport = new HttpClientTransport(clientName, SerializationHelper.GetByName(options.Serializer), sp.GetRequiredService<IHttpClientFactory>())
             });
 
             return services;

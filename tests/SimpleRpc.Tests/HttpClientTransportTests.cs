@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Fasterflect;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -8,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
 using SimpleRpc.Transports;
-using SimpleRpc.Transports.Abstractions.Client;
 using SimpleRpc.Transports.Http.Client;
 using SimpleRpc.Transports.Http.Server;
 
@@ -59,16 +56,18 @@ namespace SimpleRpc.Tests
 
             var clientServices = new ServiceCollection();
 
-            clientServices.AddSimpleRpcClient("test", new HttpClientTransportOptions
-            {
-                Url = $"{server.BaseAddress}"
-            });
+            clientServices
+                .AddSimpleRpcClient(
+                    "test",
+                    new HttpClientTransportOptions
+                    {
+                        Url = $"{server.BaseAddress}"
+                    },
+                    httpBuilder => httpBuilder.ConfigurePrimaryHttpMessageHandler(() => server.CreateHandler()));
 
             clientServices.AddSimpleRpcProxy<ITestInterface>("test");
 
             var clientProvider = clientServices.BuildServiceProvider();
-
-            clientProvider.GetService<ClientConfiguration>().Transport.SetFieldValue("_httpClient", server.CreateClient());
 
             _client = clientProvider.GetService<ITestInterface>();
         }
