@@ -1,13 +1,15 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="FSharpMapSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="FSharpMapSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,17 +17,17 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class FSharpMapSerializerFactory : ValueSerializerFactory
+    internal sealed class FSharpMapSerializerFactory : ValueSerializerFactory
     {
-        public override bool CanSerialize(Serializer serializer, Type type) =>
+        public override bool CanSerialize(Serializer serializer, Type type) => 
             type.FullName.StartsWith("Microsoft.FSharp.Collections.FSharpMap`2");
 
-        public override bool CanDeserialize(Serializer serializer, Type type) =>
+        public override bool CanDeserialize(Serializer serializer, Type type) => 
             CanSerialize(serializer, type);
 
         private static Type GetKeyType(Type type)
         {
-            return GetGenericArgument(type, 0);
+            return GetGenericArgument(type,0);
         }
 
         private static Type GetValyeType(Type type)
@@ -33,24 +35,25 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             return GetGenericArgument(type, 1);
         }
 
-        private static Type GetGenericArgument(Type type, int index)
+        private static Type GetGenericArgument(Type type,int index)
         {
             return type
                 .GetTypeInfo()
                 .GetInterfaces()
                 .Where(
                     intType =>
-                        intType.GetTypeInfo().IsGenericType &&
-                        intType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                        intType.GetTypeInfo().IsGenericType && intType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
                 .Select(intType => intType.GetTypeInfo().GetGenericArguments()[index])
                 .FirstOrDefault();
         }
+
+
 
         private static TypedArray CompileToDelegate(MethodInfo method, Type argType)
         {
             var arg = Expression.Parameter(typeof(object));
             var castArg = Expression.Convert(arg, argType);
-            var call = Expression.Call(method, new Expression[] {castArg});
+            var call = Expression.Call(method, new Expression[] { castArg });
             var castRes = Expression.Convert(call, typeof(object));
             var lambda = Expression.Lambda<TypedArray>(castRes, arg);
             var compiled = lambda.Compile();
@@ -70,17 +73,17 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 
             var mapModule = type.GetTypeInfo().Assembly.GetType("Microsoft.FSharp.Collections.MapModule");
             var ofArray = mapModule.GetTypeInfo().GetMethod("OfArray");
-            var ofArrayConcrete = ofArray.MakeGenericMethod(keyType, valueType);
+            var ofArrayConcrete = ofArray.MakeGenericMethod(keyType,valueType);
             var ofArrayCompiled = CompileToDelegate(ofArrayConcrete, arrType);
-
+           
             var toArray = mapModule.GetTypeInfo().GetMethod("ToArray");
-            var toArrayConcrete = toArray.MakeGenericMethod(keyType, valueType);
+            var toArrayConcrete = toArray.MakeGenericMethod(keyType,valueType);
             var toArrayCompiled = CompileToDelegate(toArrayConcrete, type);
 
             var arrSerializer = serializer.GetSerializerByType(arrType);
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
 
-            void Writer(Stream stream, object o, SerializerSession session)
+            ObjectWriter writer = (stream, o, session) =>
             {
                 var arr = toArrayCompiled(o);
                 arrSerializer.WriteValue(stream, arr, session);
@@ -88,16 +91,15 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
                 {
                     session.TrackSerializedObject(o);
                 }
-            }
+            };
 
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 var arr = arrSerializer.ReadValue(stream, session);
                 var res = ofArrayCompiled(arr);
                 return res;
-            }
-
-            x.Initialize(Reader, Writer);
+            };
+            x.Initialize(reader, writer);
             return x;
         }
     }

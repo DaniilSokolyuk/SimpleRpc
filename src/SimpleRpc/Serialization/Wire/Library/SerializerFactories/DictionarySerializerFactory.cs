@@ -1,14 +1,16 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="DictionarySerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="DictionarySerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
@@ -16,7 +18,7 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class DictionarySerializerFactory : ValueSerializerFactory
+    internal sealed class DictionarySerializerFactory : ValueSerializerFactory
     {
         public override bool CanSerialize(Serializer serializer, Type type) => IsInterface(type);
 
@@ -25,10 +27,7 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             return type
                 .GetTypeInfo()
                 .GetInterfaces()
-                .Select(
-                    t =>
-                        t.GetTypeInfo().IsGenericType &&
-                        t.GetTypeInfo().GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                .Select(t => t.GetTypeInfo().IsGenericType && t.GetTypeInfo().GetGenericTypeDefinition() == typeof (IDictionary<,>))
                 .Any(isDict => isDict);
         }
 
@@ -40,9 +39,9 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
             var ser = new ObjectSerializer(type);
             typeMapping.TryAdd(type, ser);
-            var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
+            var elementSerializer = serializer.GetSerializerByType(typeof (DictionaryEntry));
 
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 throw new NotSupportedException("Generic IDictionary<TKey,TValue> are not yet supported");
 #pragma warning disable CS0162 // Unreachable code detected
@@ -61,9 +60,9 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
                 }
                 //TODO: populate dictionary
                 return instance;
-            }
+            };
 
-            void Writer(Stream stream, object obj, SerializerSession session)
+            ObjectWriter writer = (stream, obj, session) =>
             {
                 if (preserveObjectReferences)
                 {
@@ -71,16 +70,16 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
                 }
                 var dict = obj as IDictionary;
                 // ReSharper disable once PossibleNullReferenceException
-                Int32Serializer.WriteValueImpl(stream, dict.Count, session);
+                Int32Serializer.WriteValueImpl(stream,dict.Count,session);
                 foreach (var item in dict)
                 {
-                    stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer, serializer.Options.PreserveObjectReferences, session);
+                    stream.WriteObject(item, typeof (DictionaryEntry), elementSerializer,
+                        serializer.Options.PreserveObjectReferences, session);
                     // elementSerializer.WriteValue(stream,item,session);
                 }
-            }
-
-            ser.Initialize(Reader, Writer);
-
+            };
+            ser.Initialize(reader, writer);
+            
             return ser;
         }
     }

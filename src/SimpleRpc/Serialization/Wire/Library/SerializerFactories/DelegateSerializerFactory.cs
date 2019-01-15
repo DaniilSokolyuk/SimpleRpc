@@ -1,19 +1,21 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="DelegateSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="DelegateSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Reflection;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class DelegateSerializerFactory : ValueSerializerFactory
+    internal sealed class DelegateSerializerFactory : ValueSerializerFactory
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
@@ -32,25 +34,22 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             typeMapping.TryAdd(type, os);
             var methodInfoSerializer = serializer.GetSerializerByType(typeof(MethodInfo));
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
-
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 var target = stream.ReadObject(session);
                 var method = (MethodInfo) stream.ReadObject(session);
                 var del = method.CreateDelegate(type, target);
                 return del;
-            }
-
-            void Writer(Stream stream, object value, SerializerSession session)
+            };
+            ObjectWriter writer = (stream, value, session) =>
             {
                 var d = (Delegate) value;
                 var method = d.GetMethodInfo();
                 stream.WriteObjectWithManifest(d.Target, session);
                 //less lookups, slightly faster
                 stream.WriteObject(method, type, methodInfoSerializer, preserveObjectReferences, session);
-            }
-
-            os.Initialize(Reader, Writer);
+            };
+            os.Initialize(reader, writer);
             return os;
         }
     }

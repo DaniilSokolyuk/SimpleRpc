@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ConsistentArraySerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ConsistentArraySerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +14,7 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class ConsistentArraySerializerFactory : ValueSerializerFactory
+    internal sealed class ConsistentArraySerializerFactory : ValueSerializerFactory
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
@@ -20,11 +23,10 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 
         public override bool CanDeserialize(Serializer serializer, Type type)
         {
-            return CanSerialize(serializer, type);
+            return CanSerialize(serializer,type);
         }
 
-        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type, ConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var res = ConsistentArraySerializer.Instance;
             typeMapping.TryAdd(type, res);

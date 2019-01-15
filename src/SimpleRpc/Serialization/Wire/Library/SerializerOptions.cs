@@ -27,20 +27,18 @@ namespace SimpleRpc.Serialization.Wire.Library
             new ToSurrogateSerializerFactory(),
             new FromSurrogateSerializerFactory(),
             new FSharpMapSerializerFactory(),
-            new FSharpListSerializerFactory(),
+            new FSharpListSerializerFactory(), 
             //order is important, try dictionaries before enumerables as dicts are also enumerable
             new ExceptionSerializerFactory(),
             new ImmutableCollectionsSerializerFactory(),
             new ExpandoObjectSerializerFactory(),
             new DefaultDictionarySerializerFactory(),
-            new LinkedListSerializerFactory(), 
             new DictionarySerializerFactory(),
-            new HashSetSerializerFactory(), 
             new ArraySerializerFactory(),
 #if NET461
             new ISerializableSerializerFactory(), //TODO: this will mess up the indexes in the serializer payload
 #endif
-            new EnumerableSerializerFactory()
+            new EnumerableSerializerFactory(),
         };
 
         internal readonly Type[] KnownTypes;

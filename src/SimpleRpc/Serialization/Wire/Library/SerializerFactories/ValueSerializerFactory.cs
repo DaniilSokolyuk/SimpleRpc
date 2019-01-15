@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ValueSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ValueSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;

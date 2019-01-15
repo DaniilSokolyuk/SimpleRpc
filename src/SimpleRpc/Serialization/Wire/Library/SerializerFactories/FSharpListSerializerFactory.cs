@@ -1,13 +1,15 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="FSharpListSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="FSharpListSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,10 +17,9 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class FSharpListSerializerFactory : ValueSerializerFactory
+    internal sealed class FSharpListSerializerFactory : ValueSerializerFactory
     {
-        public override bool CanSerialize(Serializer serializer, Type type)
-            => type.FullName.StartsWith("Microsoft.FSharp.Collections.FSharpList`1");
+        public override bool CanSerialize(Serializer serializer, Type type) => type.FullName.StartsWith("Microsoft.FSharp.Collections.FSharpList`1");
 
         public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
 
@@ -27,10 +28,7 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             return type
                 .GetTypeInfo()
                 .GetInterfaces()
-                .Where(
-                    intType =>
-                        intType.GetTypeInfo().IsGenericType &&
-                        intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
                 .FirstOrDefault();
         }
@@ -39,7 +37,7 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
         {
             var arg = Expression.Parameter(typeof(object));
             var castArg = Expression.Convert(arg, argType);
-            var call = Expression.Call(method, new Expression[] {castArg});
+            var call = Expression.Call(method, new Expression[] { castArg });
             var castRes = Expression.Convert(call, typeof(object));
             var lambda = Expression.Lambda<TypedArray>(castRes, arg);
             var compiled = lambda.Compile();
@@ -63,30 +61,29 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             var toArrayCompiled = CompileToDelegate(toArrayConcrete, type);
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
 
-            void Writer(Stream stream, object o, SerializerSession session)
+            ObjectWriter writer = (stream, o, session) =>
             {
                 var arr = toArrayCompiled(o);
                 var arrSerializer = serializer.GetSerializerByType(arrType);
-                arrSerializer.WriteValue(stream, arr, session);
+                arrSerializer.WriteValue(stream,arr,session);
                 if (preserveObjectReferences)
                 {
                     session.TrackSerializedObject(o);
                 }
-            }
+            };
 
-            object Reader(Stream stream, DeserializerSession session)
-            {
+            ObjectReader reader = (stream, session) =>
+            {               
                 var arrSerializer = serializer.GetSerializerByType(arrType);
-                var items = (Array) arrSerializer.ReadValue(stream, session);
+                var items = (Array)arrSerializer.ReadValue(stream, session);    
                 var res = ofArrayCompiled(items);
                 if (preserveObjectReferences)
                 {
                     session.TrackDeserializedObject(res);
                 }
                 return res;
-            }
-
-            x.Initialize(Reader, Writer);
+            };
+            x.Initialize(reader, writer);
             return x;
         }
     }

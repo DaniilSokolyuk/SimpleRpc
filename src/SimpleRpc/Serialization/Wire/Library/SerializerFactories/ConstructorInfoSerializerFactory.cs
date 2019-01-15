@@ -1,12 +1,14 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ConstructorInfoSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ConstructorInfoSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
@@ -14,7 +16,7 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class ConstructorInfoSerializerFactory : ValueSerializerFactory
+    internal sealed class ConstructorInfoSerializerFactory : ValueSerializerFactory
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
@@ -31,30 +33,23 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
         {
             var os = new ObjectSerializer(type);
             typeMapping.TryAdd(type, os);
-
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 var owner = stream.ReadObject(session) as Type;
                 var arguments = stream.ReadObject(session) as Type[];
 
-#if NET461
                 var ctor = owner.GetTypeInfo().GetConstructor(arguments);
                 return ctor;
-#else
-                return null;
-#endif
-            }
-
-            void Writer(Stream stream, object obj, SerializerSession session)
+            };
+            ObjectWriter writer = (stream, obj, session) =>
             {
-                var ctor = (ConstructorInfo) obj;
+                var ctor = (ConstructorInfo)obj;
                 var owner = ctor.DeclaringType;
                 var arguments = ctor.GetParameters().Select(p => p.ParameterType).ToArray();
                 stream.WriteObjectWithManifest(owner, session);
                 stream.WriteObjectWithManifest(arguments, session);
-            }
-
-            os.Initialize(Reader, Writer);
+            };
+            os.Initialize(reader, writer);
 
             return os;
         }

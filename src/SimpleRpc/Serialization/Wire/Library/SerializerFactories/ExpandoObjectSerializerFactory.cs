@@ -1,25 +1,28 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ExpandoObjectSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ExpandoObjectSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class ExpandoObjectSerializerFactory : ValueSerializerFactory
+    internal sealed class ExpandoObjectSerializerFactory : ValueSerializerFactory
     {
-        public override bool CanSerialize(Serializer serializer, Type type) => type == typeof(ExpandoObject);
+        public override bool CanSerialize(Serializer serializer, Type type) => type == typeof(System.Dynamic.ExpandoObject);
 
-        public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
+        
+
+        public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer,type);
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
             ConcurrentDictionary<Type, ValueSerializer> typeMapping)
@@ -29,9 +32,10 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
             typeMapping.TryAdd(type, ser);
             var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
 
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
-                var instance = Activator.CreateInstance(type) as IDictionary<string, object>;
+               
+                var instance = Activator.CreateInstance(type) as IDictionary<string,object>;
 
                 if (preserveObjectReferences)
                 {
@@ -40,29 +44,29 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
                 var count = stream.ReadInt32(session);
                 for (var i = 0; i < count; i++)
                 {
-                    var entry = (KeyValuePair<string, object>) stream.ReadObject(session);
+                    var entry = (KeyValuePair<string,object>)stream.ReadObject(session);
                     instance.Add(entry);
                 }
                 return instance;
-            }
+            };
 
-            void Writer(Stream stream, object obj, SerializerSession session)
+            ObjectWriter writer = (stream, obj, session) =>
             {
                 if (preserveObjectReferences)
                 {
                     session.TrackSerializedObject(obj);
                 }
-                var dict = obj as IDictionary<string, object>;
+                var dict = obj as IDictionary<string,object>;
                 // ReSharper disable once PossibleNullReferenceException
                 Int32Serializer.WriteValueImpl(stream, dict.Count, session);
                 foreach (var item in dict)
                 {
-                    stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer, serializer.Options.PreserveObjectReferences, session);
+                    stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer,
+                        serializer.Options.PreserveObjectReferences, session);
                     // elementSerializer.WriteValue(stream,item,session);
                 }
-            }
-
-            ser.Initialize(Reader, Writer);
+            };
+            ser.Initialize(reader, writer);
 
             return ser;
         }

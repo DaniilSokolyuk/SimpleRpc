@@ -1,39 +1,40 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="DefaultDictionarySerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="DefaultDictionarySerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class DefaultDictionarySerializerFactory : ValueSerializerFactory
+    internal sealed class DefaultDictionarySerializerFactory : ValueSerializerFactory
     {
-        public override bool CanSerialize(Serializer serializer, Type type) => IsDictionary(type);
+        public override bool CanSerialize(Serializer serializer, Type type) => IsInterface(type);
 
-        private static bool IsDictionary(Type type)
+        private static bool IsInterface(Type type)
         {
-            return type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+            return type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof (Dictionary<,>);
         }
 
-        public override bool CanDeserialize(Serializer serializer, Type type) => IsDictionary(type);
+        public override bool CanDeserialize(Serializer serializer, Type type) => IsInterface(type);
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
             ConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var ser = new ObjectSerializer(type);
             typeMapping.TryAdd(type, ser);
-            var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
+            var elementSerializer = serializer.GetSerializerByType(typeof (DictionaryEntry));
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
-
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 var count = stream.ReadInt32(session);
                 var instance = (IDictionary) Activator.CreateInstance(type, count);
@@ -48,26 +49,27 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
                     instance.Add(entry.Key, entry.Value);
                 }
                 return instance;
-            }
+            };
 
-            void Writer(Stream stream, object obj, SerializerSession session)
+            ObjectWriter writer = (stream, obj, session) =>
             {
+
                 if (preserveObjectReferences)
                 {
                     session.TrackSerializedObject(obj);
                 }
                 var dict = obj as IDictionary;
                 // ReSharper disable once PossibleNullReferenceException
-                Int32Serializer.WriteValueImpl(stream, dict.Count, session);
+                Int32Serializer.WriteValueImpl(stream,dict.Count,session);
                 foreach (DictionaryEntry item in dict)
                 {
-                    stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer, serializer.Options.PreserveObjectReferences, session);
+                    stream.WriteObject(item, typeof (DictionaryEntry), elementSerializer,
+                        serializer.Options.PreserveObjectReferences, session);
                     // elementSerializer.WriteValue(stream,item,session);
                 }
-            }
-
-            ser.Initialize(Reader, Writer);
-
+            };
+            ser.Initialize(reader, writer);
+            
             return ser;
         }
     }

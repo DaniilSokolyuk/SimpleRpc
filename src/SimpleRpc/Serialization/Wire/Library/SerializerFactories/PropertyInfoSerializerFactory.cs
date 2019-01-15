@@ -1,19 +1,21 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="PropertyInfoSerializerFactory.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="PropertyInfoSerializerFactory.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Reflection;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
 {
-    public class PropertyInfoSerializerFactory : ValueSerializerFactory
+    internal sealed class PropertyInfoSerializerFactory : ValueSerializerFactory
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
@@ -30,31 +32,23 @@ namespace SimpleRpc.Serialization.Wire.Library.SerializerFactories
         {
             var os = new ObjectSerializer(type);
             typeMapping.TryAdd(type, os);
-
-            object Reader(Stream stream, DeserializerSession session)
+            ObjectReader reader = (stream, session) =>
             {
                 var name = stream.ReadString(session);
                 var owner = stream.ReadObject(session) as Type;
 
-#if NET461
-                var property = owner.GetTypeInfo()
-                                    .GetProperty(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var property = owner.GetTypeInfo().GetProperty(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 return property;
-#else
-                return null;
-#endif
-            }
-
-            void Writer(Stream stream, object obj, SerializerSession session)
+            };
+            ObjectWriter writer = (stream, obj, session) =>
             {
-                var property = (PropertyInfo) obj;
+                var property = (PropertyInfo)obj;
                 var name = property.Name;
                 var owner = property.DeclaringType;
                 StringSerializer.WriteValueImpl(stream, name, session);
                 stream.WriteObjectWithManifest(owner, session);
-            }
-
-            os.Initialize(Reader, Writer);
+            };
+            os.Initialize(reader, writer);
 
             return os;
         }
