@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleRpc.Sample.Shared;
 using SimpleRpc.Transports;
@@ -9,14 +10,14 @@ namespace SimpleRpc.Sample.Client
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var sc = new ServiceCollection();
 
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
             {
                 Url = "http://127.0.0.1:5000/rpc",
-            //    Serializer = "wire"
+                Serializer = "wire"
             });
 
             sc.AddSimpleRpcProxy<IFooService>("sample");
@@ -31,15 +32,16 @@ namespace SimpleRpc.Sample.Client
             service.Plus(1, 5);
             Console.WriteLine(service.Concat("Foo", "Bar"));
 
-            service.WriteFooAsync("TaskFoo", "TaskBar").GetAwaiter().GetResult();
+            await service.WriteFooAsync("TaskFoo", "TaskBar");
 
-            Console.WriteLine(service.ConcatAsync("sadasd", "asdsd").GetAwaiter().GetResult());
-            Console.WriteLine(service.ReturnGenericTypeAsString<ICollection<string>>().GetAwaiter().GetResult());
-
+            Console.WriteLine(await service.ConcatAsync("sadasd", "asdsd"));
+            Console.WriteLine(await service.ReturnGenericTypeAsString<ICollection<string>>());
+            Console.WriteLine(string.Join(", ", await service.ReturnGenericIEnumerable<int>()));
+            
 
             try
             {
-                service.ThrowException<object>().GetAwaiter().GetResult();
+               await service.ThrowException<object>();
             }
             catch (Exception e)
             {

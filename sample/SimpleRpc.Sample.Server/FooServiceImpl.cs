@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SimpleRpc.Sample.Shared;
 
@@ -32,6 +33,11 @@ namespace SimpleRPC.Sample.Server
         {
             await Task.Delay(10);
             return typeof(T).ToString();
+        }
+
+        public Task<IEnumerable<string>> ReturnGenericIEnumerable<T>()
+        {
+            return Task.FromResult((IEnumerable<string>)new Stack<string>(new string[] { typeof(T).Name, "1", "2", "3" }));
         }
 
         public Task<T> ThrowException<T>()
