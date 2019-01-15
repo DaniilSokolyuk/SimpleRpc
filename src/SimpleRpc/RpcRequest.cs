@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Fasterflect;
 using Microsoft.Extensions.DependencyInjection;
+using SimpleRpc.Utils.ObjectMethodExecutor;
 
 namespace SimpleRpc
 {
@@ -15,25 +17,21 @@ namespace SimpleRpc
         {
             var resolvedType = serviceProvider.GetRequiredService(Method.DeclaringType);
 
-            var result = resolvedType.CallMethod(
-                Method.GenericArguments,
-                Method.MethodName,
-                Method.ParameterTypes,
-                Parameters);
+            var typeinfo = resolvedType.GetType().GetTypeInfo();
 
-            if (result is Task task)
+            //TODO: ???
+            var method = typeinfo.Method(Method.GenericArguments, Method.MethodName, Method.ParameterTypes);
+            
+            var executor = ObjectMethodExecutor.Create(method, typeinfo);
+
+            if (executor.IsMethodAsync)
             {
-                await task;
-
-                if (task.GetType().IsGenericType)
-                {
-                    return task.GetPropertyValue(nameof(Task<object>.Result));
-                }
-
-                return null;
+                return await executor.ExecuteAsync(resolvedType, Parameters);
             }
-
-            return result;
+            else
+            {
+                return executor.Execute(resolvedType, Parameters);
+            }
         }
     }
 }

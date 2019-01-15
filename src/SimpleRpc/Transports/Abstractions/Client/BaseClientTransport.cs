@@ -33,6 +33,7 @@ namespace SimpleRpc.Transports.Abstractions.Client
                 //Task<T>
                 if (invocation.Method.ReturnType.IsGenericType)
                 {
+                    //TODO: ???
                     invocation.ReturnValue = this.CallMethod(
                         invocation.Method.ReturnType.GetGenericArguments(), 
                         nameof(HandleAsyncWithResult),
