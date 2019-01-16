@@ -26,12 +26,21 @@ namespace SimpleRpc
 
             if (executor.IsMethodAsync)
             {
-                return await executor.ExecuteAsync(resolvedType, Parameters);
+                if (executor.MethodReturnType == typeof(Task))
+                {
+                    await (Task)executor.Execute(resolvedType, Parameters);
+                }
+                else
+                {
+                    return await executor.ExecuteAsync(resolvedType, Parameters);
+                }
             }
             else
             {
                 return executor.Execute(resolvedType, Parameters);
             }
+
+            return null;
         }
     }
 }

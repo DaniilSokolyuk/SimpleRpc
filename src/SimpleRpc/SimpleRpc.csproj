@@ -1,46 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
-        <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
-        <VersionPrefix>0.2.0</VersionPrefix>
-        <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
-        <Authors>Daniil Sokolyuk</Authors>
-        <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/DaniilSokolyuk/SimpleRpc</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>
-
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-62925-02" PrivateAssets="All" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Castle.Core" Version="4.3.1" />
-        <PackageReference Include="lz4net" Version="1.0.15.93" />
-        <PackageReference Include="MessagePack" Version="1.7.3.4" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-        <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-        <PackageReference Include="System.Net.Http" Version="4.3.3" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-        <Reference Include="System" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Net.Http" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
+    <Authors>Daniil Sokolyuk</Authors>
+    <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DaniilSokolyuk/SimpleRpc</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-62925-02" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.3.1" />
+    <PackageReference Include="lz4net" Version="1.0.15.93" />
+    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.3" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
 </Project>

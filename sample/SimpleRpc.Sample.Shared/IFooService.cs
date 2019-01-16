@@ -18,5 +18,8 @@ namespace SimpleRpc.Sample.Shared
         Task<IEnumerable<string>> ReturnGenericIEnumerable<T>();
 
         Task<T> ThrowException<T>();
+        
+        ValueTask<int> ValueTaskOfValueType(int result);
+        ValueTask<string> ValueTaskOfReferenceType(string result);
     }
 }

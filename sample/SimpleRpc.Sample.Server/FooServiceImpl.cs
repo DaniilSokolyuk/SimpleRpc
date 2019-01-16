@@ -7,32 +7,44 @@ namespace SimpleRPC.Sample.Server
 {
     public class FooServiceImpl : IFooService
     {
+        public ValueTask<int> ValueTaskOfValueType(int result)
+        {
+            Console.WriteLine("ValueTaskOfValueType" + result);
+            return new ValueTask<int>(result);
+        }
+
+        public ValueTask<string> ValueTaskOfReferenceType(string result)
+        {
+            Console.WriteLine("ValueTaskOfReferenceType" + result);
+            return new ValueTask<string>(result);
+        }
+        
         public void Plus(int a, int b)
         {
-            Console.WriteLine(a + b);
+            Console.WriteLine("void:" + a + b);
         }
 
         public string Concat(string a, string b)
         {
-            return a + b;
+            return "func" + a + b;
         }
 
         public async Task WriteFooAsync(string a, string b)
         {
             await Task.Delay(10);
-            Console.WriteLine(a + b);
+            Console.WriteLine("task normal" + a + b);
         }
 
         public async Task<string> ConcatAsync(string a, string b)
         {
             await Task.Delay(10);
-            return a + b;
+            return "task<T>" + a + b;
         }
 
         public async Task<string> ReturnGenericTypeAsString<T>()
         {
             await Task.Delay(10);
-            return typeof(T).ToString();
+            return "task<T>" + typeof(T).ToString();
         }
 
         public Task<IEnumerable<string>> ReturnGenericIEnumerable<T>()

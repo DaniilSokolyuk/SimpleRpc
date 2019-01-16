@@ -32,6 +32,10 @@ namespace SimpleRpc.Sample.Client
             service.Plus(1, 5);
             Console.WriteLine(service.Concat("Foo", "Bar"));
 
+
+            await service.ValueTaskOfValueType(100);
+            await service.ValueTaskOfReferenceType("REFerence");
+
             await service.WriteFooAsync("TaskFoo", "TaskBar");
 
             Console.WriteLine(await service.ConcatAsync("sadasd", "asdsd"));
