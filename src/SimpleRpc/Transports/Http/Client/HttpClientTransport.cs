@@ -35,8 +35,9 @@ namespace SimpleRpc.Transports.Http.Client
 
         private async Task<T> SendRequest<T>(RpcRequest rpcRequest)
         {
+            var httpClient = _httpClientFactory.CreateClient(_clientName);
+
             using (var streamContent = new SerializbleContent(_serializer, rpcRequest))
-            using (var httpClient = _httpClientFactory.CreateClient(_clientName))
             using (var httpResponseMessage = await httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
             {
                 httpResponseMessage.EnsureSuccessStatusCode();

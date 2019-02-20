@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
         <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
-        <VersionPrefix>0.2.0</VersionPrefix>
+        <VersionPrefix>0.2.1</VersionPrefix>
         <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
         <Authors>Daniil Sokolyuk</Authors>
         <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
@@ -26,15 +26,15 @@
         <PackageReference Include="Castle.Core" Version="4.3.1" />
         <PackageReference Include="lz4net" Version="1.0.15.93" />
         <PackageReference Include="MessagePack" Version="1.7.3.4" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
         <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-        <PackageReference Include="System.Net.Http" Version="4.3.3" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
