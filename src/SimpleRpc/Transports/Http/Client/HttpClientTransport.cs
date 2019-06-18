@@ -1,4 +1,3 @@
-﻿using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -25,13 +24,23 @@ namespace SimpleRpc.Transports.Http.Client
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override object HandleSync(RpcRequest rpcRequest) => SendRequest<object>(rpcRequest).ConfigureAwait(false).GetAwaiter().GetResult();
+        public override object HandleSync(RpcRequest rpcRequest) => WrapSendRequest<object>(rpcRequest).ConfigureAwait(false).GetAwaiter().GetResult();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override Task HandleAsync(RpcRequest rpcRequest) => SendRequest<object>(rpcRequest);
+        public override Task HandleAsync(RpcRequest rpcRequest) => WrapSendRequest<object>(rpcRequest);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override Task<T> HandleAsyncWithResult<T>(RpcRequest rpcRequest) => SendRequest<T>(rpcRequest);
+        public override Task<T> HandleAsyncWithResult<T>(RpcRequest rpcRequest) => WrapSendRequest<T>(rpcRequest);
+
+        public Task<T> WrapSendRequest<T>(RpcRequest rpcRequest)
+        {
+            if (SynchronizationContext.Current != null)
+            {
+                return Task.Run(() => SendRequest<T>(rpcRequest));
+            }
+
+            return SendRequest<T>(rpcRequest);
+        }
 
         private async Task<T> SendRequest<T>(RpcRequest rpcRequest)
         {
