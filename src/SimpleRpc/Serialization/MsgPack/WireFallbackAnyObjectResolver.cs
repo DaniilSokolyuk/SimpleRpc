@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using MessagePack;
 using MessagePack.Formatters;
 using SimpleRpc.Serialization.Wire;
-using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.MsgPack
 {
@@ -34,18 +34,19 @@ namespace SimpleRpc.Serialization.MsgPack
                 }
             }
 
-            T IMessagePackFormatter<T>.Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver,
-                out int readSize)
+            T IMessagePackFormatter<T>.Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
             {
                 if (MessagePackBinary.IsNil(bytes, offset))
                 {
                     readSize = 1;
-                    return default(T);
+                    return default;
                 }
 
                 using (var stream = new MemoryStream())
                 {
-                    stream.Write(MessagePackBinary.ReadBytes(bytes, offset, out readSize));
+                    var readedBytes = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
+                    
+                    stream.Write(readedBytes, 0, readedBytes.Length);
                     stream.Position = 0;
 
                     return (T)WireMessageSerializer._serializer.Deserialize(stream);

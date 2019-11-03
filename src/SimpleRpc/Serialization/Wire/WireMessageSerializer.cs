@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
-using LZ4;
-using SimpleRpc.Serialization.Wire.Library;
+using System.Threading;
+using System.Threading.Tasks;
+using Hyperion;
 
 namespace SimpleRpc.Serialization.Wire
 {
@@ -18,19 +20,46 @@ namespace SimpleRpc.Serialization.Wire
 
         public string ContentType => "application/x-wire";
 
-        public void Serialize(object message, Stream stream, Type type)
+        public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
         {
-            using (var lz4Stream = new LZ4Stream(stream, LZ4StreamMode.Compress, LZ4StreamFlags.IsolateInnerStream))
+            using (var pooledStream = Utils.StreamManager.GetStream())
             {
-                _serializer.Serialize(message, lz4Stream);
+                _serializer.Serialize(message, pooledStream);
+
+                pooledStream.Position = 0;
+
+                await Utils.CopyToAsync(pooledStream, stream, null, 65536, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        public object Deserialize(Stream stream, Type type)
+        public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
-            using (var lz4Stream = new LZ4Stream(stream, LZ4StreamMode.Decompress))
+            if (stream is MemoryStream ms)
             {
-                return _serializer.Deserialize(lz4Stream);
+                return _serializer.Deserialize(ms);
+            }
+
+            using (var pooledStream = Utils.StreamManager.GetStream())
+            {
+                var rentBuffer = ArrayPool<byte>.Shared.Rent(65536);
+                try
+                {
+                    int read;
+                    while ((read = await stream.ReadAsync(rentBuffer, 0, rentBuffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
+                    {
+                        pooledStream.Write(rentBuffer, 0, read);
+                    }
+
+                    pooledStream.Position = 0;
+
+                    return _serializer.Deserialize(pooledStream);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(rentBuffer);
+                }
+
+
             }
         }
     }

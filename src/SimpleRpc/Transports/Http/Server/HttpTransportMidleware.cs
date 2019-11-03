@@ -13,8 +13,8 @@ namespace SimpleRpc.Transports.Http.Server
         private readonly HttpServerTransportOptions _httpServerTransportOptions;
 
         public HttpTransportMidleware(
-            RequestDelegate next, 
-            ILogger<HttpTransportMidleware> logger, 
+            RequestDelegate next,
+            ILogger<HttpTransportMidleware> logger,
             HttpServerTransportOptions httpServerTransportOptions)
         {
             _next = next;
@@ -44,7 +44,7 @@ namespace SimpleRpc.Transports.Http.Server
                 {
                     try
                     {
-                        rpcRequest = (RpcRequest)serializer.Deserialize(context.Request.Body, typeof(RpcRequest));
+                        rpcRequest = (RpcRequest)await serializer.DeserializeAsync(context.Request.Body, typeof(RpcRequest));
                     }
                     catch (Exception e)
                     {
@@ -82,13 +82,13 @@ namespace SimpleRpc.Transports.Http.Server
                 }
 
                 context.Response.ContentType = serializer.ContentType;
-                serializer.Serialize(
+                await serializer.SerializeAsync(
+                    context.Response.Body,
                     new RpcResponse
                     {
                         Result = result,
                         Error = rpcError
                     },
-                    context.Response.Body,
                     typeof(RpcResponse));
             }
         }
