@@ -1,17 +1,12 @@
-﻿using Microsoft.IO;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
+﻿using System.Buffers;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SimpleRpc
+namespace SimpleRpc.Serialization.Hyperion
 {
-    public static class SimpleRpcUtils
+    internal static class SimpleRpcUtils
     {
-        public static RecyclableMemoryStreamManager StreamManager = new RecyclableMemoryStreamManager();
 
         public static async Task CopyToAsync(Stream source, Stream destination, CancellationToken cancel)
         {

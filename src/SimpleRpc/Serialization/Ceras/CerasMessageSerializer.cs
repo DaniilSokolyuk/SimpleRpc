@@ -59,57 +59,78 @@ namespace SimpleRpc.Serialization.Ceras
 
         public string ContentType => "application/x-ceras";
 
+        private static readonly byte Header = 0x62; //98
+        private static int HeaderLength = 9;
+
         public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
         {
-            byte[] buff = null;
+            byte[] uncromressedBuff = null;
 
             try
             {
-                var buffLength = _serializer.Value.Serialize(message, ref buff, 0);
+                var uncromressedLength = _serializer.Value.Serialize(message, ref uncromressedBuff, 0);
 
-                var bufferForLZ4 = ArrayPool<byte>.Shared.Rent(LZ4Codec.MaximumOutputSize(buffLength) + 8); //8 for headers
+                var compressedBuff = ArrayPool<byte>.Shared.Rent(LZ4Codec.MaximumOutputSize(uncromressedLength) + HeaderLength); //9 for headers
                 try
                 {
-                    var encodedLength = LZ4Codec.Encode(
-                        buff, 0, buffLength,
-                        bufferForLZ4, 5, bufferForLZ4.Length - 5);
+                    var compressedLength = LZ4Codec.Encode(
+                        uncromressedBuff, 0, uncromressedLength,
+                        compressedBuff, HeaderLength, compressedBuff.Length - HeaderLength);
 
-                    await stream.WriteAsync(bufferForLZ4, 0, encodedLength + 5).ConfigureAwait(false);
+                    var offset = 0;
+                    SerializerBinary.WriteByte(ref compressedBuff, ref offset, Header);
+                    SerializerBinary.WriteInt32Fixed(ref compressedBuff, ref offset, compressedLength);
+                    SerializerBinary.WriteInt32Fixed(ref compressedBuff, ref offset, uncromressedLength);
+
+                    await stream.WriteAsync(compressedBuff, 0, compressedLength + HeaderLength).ConfigureAwait(false);
                 }
                 finally
                 {
-                    ArrayPool<byte>.Shared.Return(bufferForLZ4);
+                    ArrayPool<byte>.Shared.Return(compressedBuff);
                 }
 
             }
             finally
             {
-                if (buff != null)
+                if (uncromressedBuff != null)
                 {
-                    CerasBufferPool.Pool.Return(buff);
+                    CerasBufferPool.Pool.Return(uncromressedBuff);
                 }
             }
         }
 
         public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
-            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
+            var lengthBuffer = new byte[9];
+            await stream.ReadAsync(lengthBuffer, 0, HeaderLength, cancellationToken);
+
+            var offset = 0;
+            var header = SerializerBinary.ReadByte(lengthBuffer, ref offset);
+            if (header != Header)
+                throw new Exception("Not expected header error");
+
+            var compressedLength = SerializerBinary.ReadInt32Fixed(lengthBuffer, ref offset);
+            var uncompressedLength = SerializerBinary.ReadInt32Fixed(lengthBuffer, ref offset);
+
+            var buffer = ArrayPool<byte>.Shared.Rent(compressedLength + uncompressedLength);
+            try
             {
-                await SimpleRpcUtils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
+                await stream.ReadAsync(buffer, offset, compressedLength).ConfigureAwait(false);
+                offset += compressedLength; // = HeaderLength + compressedLength
 
-                pooledStream.Position = 0;
+                LZ4Codec.Decode(
+                        buffer, HeaderLength, compressedLength,
+                        buffer, offset, uncompressedLength);
 
-                var buffer = ArrayPool<byte>.Shared.Rent(pooledStream.Capacity);
-                try
-                {
-                    pooledStream.Read(buffer, 0, pooledStream.Capacity);
+                object obj = null;
 
-                    return _serializer.Value.Deserialize<object>(buffer);
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
+                _serializer.Value.Deserialize(ref obj, buffer, ref offset);
+
+                return obj;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
     }

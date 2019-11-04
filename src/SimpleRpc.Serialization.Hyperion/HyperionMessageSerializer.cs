@@ -3,11 +3,14 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Hyperion;
+using Microsoft.IO;
 
 namespace SimpleRpc.Serialization.Hyperion
 {
     public class HyperionMessageSerializer : IMessageSerializer
     {
+        private static RecyclableMemoryStreamManager StreamManager = new RecyclableMemoryStreamManager();
+
         internal static Serializer _serializer;
 
         static HyperionMessageSerializer()
@@ -19,7 +22,7 @@ namespace SimpleRpc.Serialization.Hyperion
 
         public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
         {
-            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
+            using (var pooledStream = StreamManager.GetStream())
             {
                 _serializer.Serialize(message, pooledStream);
 
@@ -36,7 +39,7 @@ namespace SimpleRpc.Serialization.Hyperion
                 return _serializer.Deserialize(ms);
             }
 
-            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
+            using (var pooledStream = StreamManager.GetStream())
             {
                 await SimpleRpcUtils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 

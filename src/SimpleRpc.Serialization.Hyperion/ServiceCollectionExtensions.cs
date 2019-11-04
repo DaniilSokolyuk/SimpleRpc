@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SimpleRpc.Serialization;
-using SimpleRpc.Serialization.Hyperion;
 
-namespace SimpleRpc.Hyperion
+namespace SimpleRpc.Serialization.Hyperion
 {
     public static class ServiceCollectionExtensions
     {

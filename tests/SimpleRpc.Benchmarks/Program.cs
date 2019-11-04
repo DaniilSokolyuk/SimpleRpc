@@ -8,14 +8,14 @@ namespace SimpleRpc.Benchmarks
     {
         static async Task Main(string[] args)
         {
-            //var tt = new SerializerBenchmark();
+            var tt = new SerializerBenchmark();
 
-            //tt.Setup();
+            tt.Setup();
 
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    await tt.CerasSerialize();
-            //}
+            for (int i = 0; i < 100; i++)
+            {
+                await tt.CerasDeserialize();
+            }
 
             BenchmarkRunner.Run<SerializerBenchmark>();
         }

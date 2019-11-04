@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
-using SimpleRpc.Hyperion;
+using SimpleRpc.Serialization.Hyperion;
 using SimpleRpc.Transports;
 using SimpleRpc.Transports.Http.Client;
 using SimpleRpc.Transports.Http.Server;
