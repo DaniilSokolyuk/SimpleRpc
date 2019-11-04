@@ -58,19 +58,28 @@ Sample Projects
 
 Serializers
 ---
+[Ceras](https://github.com/rikimaru0345/Ceras) is using by default based on benchmarks
+
+|           Method |     Mean |     Error |    StdDev |    Gen 0 |   Gen 1 |   Gen 2 |  Allocated |
+|----------------- |---------:|----------:|----------:|---------:|--------:|--------:|-----------:|
+|   CerasSerialize | 2.663 ms | 0.0146 ms | 0.0137 ms |  58.5938 | 58.5938 | 58.5938 |  254.96 KB |
+| CerasDeserialize | 1.403 ms | 0.0048 ms | 0.0043 ms | 216.7969 | 82.0313 |       - | 1157.19 KB |
+|    WireSerialize | 9.065 ms | 0.0066 ms | 0.0055 ms |  78.1250 |       - |       - |  526.68 KB |
+|  WireDeserialize | 5.340 ms | 0.0137 ms | 0.0128 ms | 156.2500 | 62.5000 |       - |  799.37 KB |
+
 Default serializer can be changed in `Serializer` property, for example
 ```C#
 sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
 {
     Url = "http://127.0.0.1:5000/rpc",
-    Serializer = "wire"
+    Serializer = "HyperionMessageSerializer"
 });
 ```
 
 | Serializer                      | Name (for client options)          
-| ------------------------------- |:----------:|
-| MessagePack (lz4 compression)   | msgpack    | 
-| Wire (lz4 compression)          | wire       |
+| ------------------------------- |:-------------------------:|
+| Ceras                           | CerasMessageSerializer    | 
+| Hyperion                        | HyperionMessageSerializer |
 
 
 ---
