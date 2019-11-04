@@ -36,48 +36,30 @@ namespace SimpleRpc.Serialization.MsgPack
 
         public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
         {
-            var rentBuffer = ArrayPool<byte>.Shared.Rent(65536);
-            try
+            using (var pooledStream = Utils.StreamManager.GetStream())
             {
-                var buffer = rentBuffer; //becauce buffer ref can be changed in serialize
-                var len = MessagePackSerializer.NonGeneric.Serialize(type, ref buffer, 0, message, _resolver);
+                MessagePackSerializer.NonGeneric.Serialize(type, pooledStream, message, _resolver);
 
-                // do not need resize.
-                await stream.WriteAsync(buffer, 0, len, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(rentBuffer);
+                pooledStream.Position = 0;
+
+                await Utils.CopyToDestAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
         public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
-            if (stream is MemoryStream ms && ms.TryGetBuffer(out ArraySegment<byte> streamBuffer))
+            if (stream is MemoryStream ms)
             {
-                return MessagePackSerializer.NonGeneric.Deserialize(type, streamBuffer, _resolver);
+                return MessagePackSerializer.NonGeneric.Deserialize(type, ms, _resolver);
             }
 
-            var rentBuffer = ArrayPool<byte>.Shared.Rent(65536);
-            var buf = rentBuffer; //becauce buf ref can be changed in FastResize
-            try
+            using (var pooledStream = Utils.StreamManager.GetStream())
             {
-                int length = 0;
-                int read;
-                while ((read = await stream.ReadAsync(buf, length, buf.Length - length, cancellationToken).ConfigureAwait(false)) > 0)
-                {
-                    length += read;
-                    if (length == buf.Length)
-                    {
-                        MessagePackBinary.FastResize(ref buf, length * 2);
-                    }
-                }
+                await Utils.CopyFromSourceAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 
-                return MessagePackSerializer.NonGeneric.Deserialize(type, buf, _resolver);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(rentBuffer);
+                pooledStream.Position = 0;
+
+                return MessagePackSerializer.NonGeneric.Deserialize(type, pooledStream, _resolver);
             }
         }
     }

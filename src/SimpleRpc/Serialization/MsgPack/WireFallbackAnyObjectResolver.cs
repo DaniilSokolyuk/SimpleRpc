@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using MessagePack;
+﻿using MessagePack;
 using MessagePack.Formatters;
 using SimpleRpc.Serialization.Wire;
 
@@ -26,11 +24,12 @@ namespace SimpleRpc.Serialization.MsgPack
                     return MessagePackBinary.WriteNil(ref bytes, offset);
                 }
 
-                using (var stream = new MemoryStream())
+                using (var stream = Utils.StreamManager.GetStream())
                 {
                     WireMessageSerializer._serializer.Serialize(value, stream);
+                    stream.Position = 0;
 
-                    return MessagePackBinary.WriteBytes(ref bytes, offset, stream.ToArray());
+                    return Utils.CopyTo(stream, ref bytes, offset);
                 }
             }
 
@@ -42,7 +41,7 @@ namespace SimpleRpc.Serialization.MsgPack
                     return default;
                 }
 
-                using (var stream = new MemoryStream())
+                using (var stream = Utils.StreamManager.GetStream())
                 {
                     var readedBytes = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
                     

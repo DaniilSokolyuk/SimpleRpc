@@ -28,7 +28,7 @@ namespace SimpleRpc.Serialization.Wire
 
                 pooledStream.Position = 0;
 
-                await Utils.CopyToAsync(pooledStream, stream, null, 65536, cancellationToken).ConfigureAwait(false);
+                await Utils.CopyToDestAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -41,25 +41,11 @@ namespace SimpleRpc.Serialization.Wire
 
             using (var pooledStream = Utils.StreamManager.GetStream())
             {
-                var rentBuffer = ArrayPool<byte>.Shared.Rent(65536);
-                try
-                {
-                    int read;
-                    while ((read = await stream.ReadAsync(rentBuffer, 0, rentBuffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
-                    {
-                        pooledStream.Write(rentBuffer, 0, read);
-                    }
+                await Utils.CopyFromSourceAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 
-                    pooledStream.Position = 0;
+                pooledStream.Position = 0;
 
-                    return _serializer.Deserialize(pooledStream);
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(rentBuffer);
-                }
-
-
+                return _serializer.Deserialize(pooledStream);            
             }
         }
     }
