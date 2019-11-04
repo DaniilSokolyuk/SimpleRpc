@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SimpleRpc.Serialization.Hyperion\SimpleRpc.Serialization.Hyperion.csproj" />
     <ProjectReference Include="..\..\src\SimpleRpc\SimpleRpc.csproj" />
   </ItemGroup>
 

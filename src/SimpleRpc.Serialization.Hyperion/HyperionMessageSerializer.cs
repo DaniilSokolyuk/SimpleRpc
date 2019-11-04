@@ -5,30 +5,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hyperion;
 
-namespace SimpleRpc.Serialization.Wire
+namespace SimpleRpc.Serialization.Hyperion
 {
-    public class WireMessageSerializer : IMessageSerializer
+    public class HyperionMessageSerializer : IMessageSerializer
     {
         internal static Serializer _serializer;
 
-        static WireMessageSerializer()
+        static HyperionMessageSerializer()
         {
             _serializer = new Serializer();
         }
 
-        public string Name => Constants.DefaultSerializers.Wire;
-
-        public string ContentType => "application/x-wire";
+        public string ContentType => "application/x-hyperion";
 
         public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
         {
-            using (var pooledStream = Utils.StreamManager.GetStream())
+            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
             {
                 _serializer.Serialize(message, pooledStream);
 
                 pooledStream.Position = 0;
 
-                await Utils.CopyToAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
+                await SimpleRpcUtils.CopyToAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -39,13 +37,13 @@ namespace SimpleRpc.Serialization.Wire
                 return _serializer.Deserialize(ms);
             }
 
-            using (var pooledStream = Utils.StreamManager.GetStream())
+            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
             {
-                await Utils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
+                await SimpleRpcUtils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 
                 pooledStream.Position = 0;
 
-                return _serializer.Deserialize(pooledStream);            
+                return _serializer.Deserialize(pooledStream);
             }
         }
     }

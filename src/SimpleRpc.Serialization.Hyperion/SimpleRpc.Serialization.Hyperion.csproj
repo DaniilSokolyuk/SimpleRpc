@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>SimpleRpc.Serialization.Hyperion</AssemblyName>
+    <RootNamespace>SimpleRpc.Serialization.Hyperion</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hyperion" Version="0.9.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleRpc\SimpleRpc.csproj" />
+  </ItemGroup>
+
+</Project>

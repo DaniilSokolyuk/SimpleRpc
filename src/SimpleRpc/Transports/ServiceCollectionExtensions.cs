@@ -3,6 +3,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SimpleRpc.Serialization;
+using SimpleRpc.Serialization.Ceras;
 using SimpleRpc.Transports.Abstractions.Client;
 using SimpleRpc.Transports.Abstractions.Server;
 using SimpleRpc.Transports.Http.Client;
@@ -50,13 +51,16 @@ namespace SimpleRpc.Transports
             httpclientBuilder?.Invoke(clientBuilder);
 
             services.TryAddSingleton<IClientConfigurationManager, ClientConfigurationManager>();
+            services.TryAddSingleton<ISerializationHelper, SerializationHelper>();
+            services.TryAddSingleton<IMessageSerializer, CerasMessageSerializer>();
             services.AddSingleton(
                 sp => new ClientConfiguration
                 {
                     Name = clientName,
                     Transport = new HttpClientTransport(
                         clientName,
-                        SerializationHelper.GetByName(options.Serializer),
+                        sp.GetRequiredService<ISerializationHelper>().TryGetByTypeName(options.Serializer),
+                        sp.GetRequiredService<ISerializationHelper>(),
                         sp.GetRequiredService<IHttpClientFactory>())
                 });
 

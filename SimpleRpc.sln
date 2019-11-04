@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRpc.Tests", "tests\Si
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRpc.Benchmarks", "tests\SimpleRpc.Benchmarks\SimpleRpc.Benchmarks.csproj", "{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRpc.Serialization.Hyperion", "src\SimpleRpc.Serialization.Hyperion\SimpleRpc.Serialization.Hyperion.csproj", "{E68F416B-EB58-4B2B-9CF3-5BFE1AC5FF19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68F416B-EB58-4B2B-9CF3-5BFE1AC5FF19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68F416B-EB58-4B2B-9CF3-5BFE1AC5FF19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68F416B-EB58-4B2B-9CF3-5BFE1AC5FF19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68F416B-EB58-4B2B-9CF3-5BFE1AC5FF19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

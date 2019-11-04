@@ -11,8 +11,8 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>
+        <!--<SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>-->
 
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
@@ -20,8 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="Ceras" Version="4.1.7" />
-        <PackageReference Include="Hyperion" Version="0.9.10" />
-        <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.1.11" />
+        <PackageReference Include="K4os.Compression.LZ4" Version="1.1.11" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="1.3.0" />
     </ItemGroup>
 

@@ -61,9 +61,9 @@ namespace SimpleRpc.Tests
                     "test",
                     new HttpClientTransportOptions
                     {
-                        Url = $"{server.BaseAddress}"
+                        Url = $"{server.BaseAddress}",
                     },
-                    httpBuilder => httpBuilder.ConfigurePrimaryHttpMessageHandler(() => server.CreateHandler()));
+                    httpBuilder => httpBuilder.ConfigurePrimaryHttpMessageHandler(() => server.CreateHandler()));;
 
             clientServices.AddSimpleRpcProxy<ITestInterface>("test");
 

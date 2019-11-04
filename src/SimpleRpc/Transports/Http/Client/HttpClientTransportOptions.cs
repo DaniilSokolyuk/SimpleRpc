@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleRpc.Transports.Http.Client
 {
@@ -10,6 +11,6 @@ namespace SimpleRpc.Transports.Http.Client
 
         public IDictionary<string, string> DefaultRequestHeaders { get; set; }
 
-        public string Serializer { get; set; } = Constants.DefaultSerializers.Ceras;
+        public string Serializer { get; set; }
     }
 }

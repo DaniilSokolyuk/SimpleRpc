@@ -10,17 +10,19 @@ using SimpleRpc.Transports.Abstractions.Client;
 
 namespace SimpleRpc.Transports.Http.Client
 {
-    public class HttpClientTransport : BaseClientTransport
+    internal class HttpClientTransport : BaseClientTransport
     {
         private readonly string _clientName;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMessageSerializer _serializer;
+        private readonly ISerializationHelper serializationHelper;
 
-        public HttpClientTransport(string clientName, IMessageSerializer serializer, IHttpClientFactory httpClientFactory)
+        public HttpClientTransport(string clientName, IMessageSerializer serializer, ISerializationHelper serializationHelper, IHttpClientFactory httpClientFactory)
         {
             _clientName = clientName;
             _httpClientFactory = httpClientFactory;
             _serializer = serializer;
+            this.serializationHelper = serializationHelper;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,7 +53,7 @@ namespace SimpleRpc.Transports.Http.Client
             {
                 httpResponseMessage.EnsureSuccessStatusCode();
 
-                var resultSerializer = SerializationHelper.GetByContentType(httpResponseMessage.Content.Headers.ContentType.MediaType);
+                var resultSerializer = serializationHelper.GetByContentType(httpResponseMessage.Content.Headers.ContentType.MediaType);
                 var stream = await httpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
                 var result = (RpcResponse)await resultSerializer.DeserializeAsync(stream, typeof(RpcResponse)).ConfigureAwait(false);

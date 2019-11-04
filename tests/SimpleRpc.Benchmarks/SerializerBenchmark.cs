@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using SimpleRpc.Serialization;
+using SimpleRpc.Serialization.Ceras;
+using SimpleRpc.Serialization.Hyperion;
 
 namespace SimpleRpc.Benchmarks
 {
@@ -16,31 +18,36 @@ namespace SimpleRpc.Benchmarks
         {
             PopulateTestData();
 
-            SerializationHelper.GetByName(Constants.DefaultSerializers.Ceras).SerializeAsync(_serializedCeras, _data, _data.GetType());
-            SerializationHelper.GetByName(Constants.DefaultSerializers.Wire).SerializeAsync(_serializedWire, _data, _data.GetType());
-            SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack).SerializeAsync(_serializedMsgPack, _data, _data.GetType());
+            _ceras = new CerasMessageSerializer();
+            _hyperion = new HyperionMessageSerializer();
+
+            _ceras.SerializeAsync(_serializedCeras, _data, _data.GetType()).GetAwaiter().GetResult();
+            _hyperion.SerializeAsync(_serializedWire, _data, _data.GetType()).GetAwaiter().GetResult();
         }
 
-        private Stream _serializedMsgPack = new MemoryStream();
+        private CerasMessageSerializer _ceras;
+        private HyperionMessageSerializer _hyperion;
+
+
         private Stream _serializedCeras = new MemoryStream();
         private Stream _serializedWire = new MemoryStream();
 
         private IList<TestClass> _data = new List<TestClass>();
 
-        //[Benchmark]
+        [Benchmark]
         public async Task CerasSerialize()
         {
             using (var ms = new MemoryStream())
             {
-                await SerializationHelper.GetByName(Constants.DefaultSerializers.Ceras).SerializeAsync(ms, _data, _data.GetType());
+                await _ceras.SerializeAsync(ms, _data, _data.GetType());
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public async Task CerasDeserialize()
         {
             _serializedCeras.Position = 0;
-            var obj = await SerializationHelper.GetByName(Constants.DefaultSerializers.Ceras).DeserializeAsync(_serializedCeras, _data.GetType());
+            var obj = await _ceras.DeserializeAsync(_serializedCeras, _data.GetType());
             var result = (IList<TestClass>)obj;
 
             if (!result[0].Equals(_data[0]))
@@ -49,43 +56,20 @@ namespace SimpleRpc.Benchmarks
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public async Task WireSerialize()
         {
             using (var ms = new MemoryStream())
             {
-                await SerializationHelper.GetByName(Constants.DefaultSerializers.Wire).SerializeAsync(ms, _data, _data.GetType());
+                await _hyperion.SerializeAsync(ms, _data, _data.GetType());
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public async Task WireDeserialize()
         {
             _serializedWire.Position = 0;
-            var obj = await SerializationHelper.GetByName(Constants.DefaultSerializers.Wire).DeserializeAsync(_serializedWire, _data.GetType());
-            var result = (IList<TestClass>)obj;
-
-            if (!result[0].Equals(_data[0]))
-            {
-                throw new Exception("error");
-            }
-        }
-
-
-        [Benchmark]
-        public async Task MsgPackSerialize()
-        {
-            using (var ms = new MemoryStream())
-            {
-                await SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack).SerializeAsync(ms, _data, _data.GetType());
-            }
-        }
-
-        [Benchmark]
-        public async Task MsgPackDeserialize()
-        {
-            _serializedMsgPack.Position = 0;
-            var obj = await SerializationHelper.GetByName(Constants.DefaultSerializers.MessagePack).DeserializeAsync(_serializedMsgPack, _data.GetType());
+            var obj = await _hyperion.DeserializeAsync(_serializedWire, _data.GetType());
             var result = (IList<TestClass>)obj;
 
             if (!result[0].Equals(_data[0]))

@@ -19,7 +19,6 @@ namespace SimpleRpc.Sample.Client
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
             {
                 Url = "http://127.0.0.1:5000/rpc",
-                Serializer = "wire"
             });
 
             sc.AddSimpleRpcProxy<IFooService>("sample");

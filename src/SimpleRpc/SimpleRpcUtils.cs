@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SimpleRpc
 {
-    internal static class Utils
+    public static class SimpleRpcUtils
     {
         public static RecyclableMemoryStreamManager StreamManager = new RecyclableMemoryStreamManager();
 

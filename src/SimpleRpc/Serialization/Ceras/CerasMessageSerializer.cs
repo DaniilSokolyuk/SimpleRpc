@@ -1,14 +1,18 @@
 ﻿using Ceras;
+using K4os.Compression.LZ4;
+using SimpleRpc.Serialization;
 using System;
 using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SimpleRpc.Serialization.Wire
+namespace SimpleRpc.Serialization.Ceras
 {
     public class CerasMessageSerializer : IMessageSerializer
     {
+        public static Type Type = typeof(CerasMessageSerializer);
+
         private class CerasBuffer : ICerasBufferPool
         {
             public byte[] RentBuffer(int minimumSize)
@@ -23,7 +27,7 @@ namespace SimpleRpc.Serialization.Wire
         }
 
         private SerializerConfig config = null;
-        private ThreadLocal<CerasSerializer> _serializer;
+        private readonly ThreadLocal<CerasSerializer> _serializer;
 
         public CerasMessageSerializer()
         {
@@ -53,8 +57,6 @@ namespace SimpleRpc.Serialization.Wire
 
         }
 
-        public string Name => Constants.DefaultSerializers.Ceras;
-
         public string ContentType => "application/x-ceras";
 
         public async Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default)
@@ -63,16 +65,22 @@ namespace SimpleRpc.Serialization.Wire
 
             try
             {
-                var length = _serializer.Value.Serialize(message, ref buff, 0);
+                var buffLength = _serializer.Value.Serialize(message, ref buff, 0);
 
-                if (stream is MemoryStream)
+                var bufferForLZ4 = ArrayPool<byte>.Shared.Rent(LZ4Codec.MaximumOutputSize(buffLength) + 8); //8 for headers
+                try
                 {
-                    stream.Write(buff, 0, length);
+                    var encodedLength = LZ4Codec.Encode(
+                        buff, 0, buffLength,
+                        bufferForLZ4, 5, bufferForLZ4.Length - 5);
+
+                    await stream.WriteAsync(bufferForLZ4, 0, encodedLength + 5).ConfigureAwait(false);
                 }
-                else
+                finally
                 {
-                    await stream.WriteAsync(buff, 0, length).ConfigureAwait(false);
+                    ArrayPool<byte>.Shared.Return(bufferForLZ4);
                 }
+
             }
             finally
             {
@@ -85,14 +93,9 @@ namespace SimpleRpc.Serialization.Wire
 
         public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
-            if (stream is MemoryStream ms && ms.TryGetBuffer(out var msBuffer))
+            using (var pooledStream = SimpleRpcUtils.StreamManager.GetStream())
             {
-                return _serializer.Value.Deserialize<object>(msBuffer.Array);
-            }
-
-            using (var pooledStream = Utils.StreamManager.GetStream())
-            {
-                await Utils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
+                await SimpleRpcUtils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 
                 pooledStream.Position = 0;
 

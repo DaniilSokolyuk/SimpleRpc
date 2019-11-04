@@ -1,33 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using SimpleRpc.Serialization.Wire;
+using System.Linq;
 
 namespace SimpleRpc.Serialization
 {
-    public static class SerializationHelper
+    internal interface ISerializationHelper
     {
-        private static readonly IDictionary<string, IMessageSerializer> _contentTypeSerializer = new Dictionary<string, IMessageSerializer>(StringComparer.OrdinalIgnoreCase);
-        private static readonly IDictionary<string, IMessageSerializer> _nameSerializer = new Dictionary<string, IMessageSerializer>(StringComparer.OrdinalIgnoreCase);
+        IMessageSerializer TryGetByTypeName(string contentType);
 
-        static SerializationHelper()
+        IMessageSerializer GetByContentType(string contentType);
+    }
+
+    internal class SerializationHelper : ISerializationHelper
+    {
+        private readonly IDictionary<string, IMessageSerializer> _contentTypeSerializer;
+        private readonly IDictionary<string, IMessageSerializer> _typeNameSerializer;
+
+        public SerializationHelper(IEnumerable<IMessageSerializer> messageSerializers)
         {
-            Add(new WireMessageSerializer());
-            Add(new CerasMessageSerializer());
+            _contentTypeSerializer = messageSerializers.ToDictionary(x => x.ContentType);
+            _typeNameSerializer = messageSerializers.ToDictionary(x => x.GetType().Name, StringComparer.OrdinalIgnoreCase);
         }
 
-        public static void Add(IMessageSerializer serializer)
+        public IMessageSerializer TryGetByTypeName(string typeName)
         {
-            _nameSerializer.Add(serializer.Name, serializer);
-            _contentTypeSerializer.Add(serializer.ContentType, serializer);
+            if (_typeNameSerializer.TryGetValue(typeName, out var serializer))
+            {
+                return serializer;
+            }
+
+            return _typeNameSerializer[typeof(Ceras.CerasMessageSerializer).Name];
         }
 
-        public static IMessageSerializer GetByName(string name)
-        {
-            _nameSerializer.TryGetValue(name, out var serializer);
-            return serializer;
-        }
-
-        public static IMessageSerializer GetByContentType(string contentType)
+        public IMessageSerializer GetByContentType(string contentType)
         {
             _contentTypeSerializer.TryGetValue(contentType, out var serializer);
             return serializer;

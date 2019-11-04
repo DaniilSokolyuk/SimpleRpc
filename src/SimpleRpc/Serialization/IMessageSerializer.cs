@@ -7,8 +7,6 @@ namespace SimpleRpc.Serialization
 {
     public interface IMessageSerializer
     {
-        string Name { get; }
-
         string ContentType { get; }
 
         Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default);
