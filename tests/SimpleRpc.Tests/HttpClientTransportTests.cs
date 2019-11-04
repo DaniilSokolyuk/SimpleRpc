@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
+using SimpleRpc.Hyperion;
 using SimpleRpc.Transports;
 using SimpleRpc.Transports.Http.Client;
 using SimpleRpc.Transports.Http.Server;
@@ -45,7 +46,8 @@ namespace SimpleRpc.Tests
                 new WebHostBuilder()
                     .ConfigureServices(services =>
                     {
-                        services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/"});
+                        services.AddSimpleRpcServer(new HttpServerTransportOptions {Path = "/"})
+                                .AddSimpleRpcHyperionSerializer();
 
                         services.AddSingleton(_serverMock);
                     })

@@ -52,7 +52,7 @@ namespace SimpleRpc.Transports
 
             services.TryAddSingleton<IClientConfigurationManager, ClientConfigurationManager>();
             services.TryAddSingleton<ISerializationHelper, SerializationHelper>();
-            services.TryAddSingleton<IMessageSerializer, CerasMessageSerializer>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IMessageSerializer), typeof(CerasMessageSerializer)));
             services.AddSingleton(
                 sp => new ClientConfiguration
                 {
@@ -100,7 +100,9 @@ namespace SimpleRpc.Transports
 
             var serverTransport = new HttpServerTransport();
 
-            services.AddSingleton<IServerTransport>(serverTransport);
+            services.TryAddSingleton<IServerTransport>(serverTransport);
+            services.TryAddSingleton<ISerializationHelper, SerializationHelper>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IMessageSerializer), typeof(CerasMessageSerializer)));
             serverTransport.ConfigureServices(services, options);
 
             return services;

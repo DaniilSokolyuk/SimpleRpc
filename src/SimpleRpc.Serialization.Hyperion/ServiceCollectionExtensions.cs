@@ -9,7 +9,7 @@ namespace SimpleRpc.Hyperion
     {
         public static IServiceCollection AddSimpleRpcHyperionSerializer(this IServiceCollection services)
         {
-            services.TryAddSingleton<IMessageSerializer, HyperionMessageSerializer>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IMessageSerializer), typeof(HyperionMessageSerializer)));
             return services;
         }
     }
