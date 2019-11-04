@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -9,6 +10,8 @@ using SimpleRpc.Serialization.Hyperion;
 using SimpleRpc.Transports;
 using SimpleRpc.Transports.Http.Client;
 using SimpleRpc.Transports.Http.Server;
+using NSubstitute.ExceptionExtensions;
+
 
 namespace SimpleRpc.Tests
 {
@@ -31,6 +34,8 @@ namespace SimpleRpc.Tests
         Task<string> TaskWithReturnGenericWithArgs<T, TT>(T arg, TT arg2);
 
         Task<TOut> TaskWithReturnGenericWithArgsGenericOut<T, TT, TOut>(T arg, TT arg2);
+
+        Task<T> ThrowException<T>();
     }
 
     public class HttpClientTransportTests
@@ -64,8 +69,10 @@ namespace SimpleRpc.Tests
                     new HttpClientTransportOptions
                     {
                         Url = $"{server.BaseAddress}",
+                        //Serializer = "HyperionMessageSerializer"
                     },
-                    httpBuilder => httpBuilder.ConfigurePrimaryHttpMessageHandler(() => server.CreateHandler()));;
+                    httpBuilder => httpBuilder.ConfigurePrimaryHttpMessageHandler(() => server.CreateHandler()))
+                .AddSimpleRpcHyperionSerializer();
 
             clientServices.AddSimpleRpcProxy<ITestInterface>("test");
 
@@ -86,6 +93,20 @@ namespace SimpleRpc.Tests
             //should
             _serverMock.Received().String("a", "b");
             result.Should().Be("ab");
+        }
+
+        [Test]
+        public async Task TestException()
+        {
+            _serverMock.ThrowException<object>().Throws(new ArgumentException("Error received"));
+
+            Func<Task> act = async () =>
+            {
+                await _client.ThrowException<object>();
+            };
+
+            await act.Should().ThrowAsync<RpcException>()
+                .WithMessage("SimpleRpc server exception: RemoteMethodInvocation");
         }
     }
 }
