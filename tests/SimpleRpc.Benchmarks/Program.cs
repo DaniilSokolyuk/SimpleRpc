@@ -14,7 +14,7 @@ namespace SimpleRpc.Benchmarks
 
             for (int i = 0; i < 100; i++)
             {
-                await tt.CerasDeserialize();
+                await tt.WireDeserialize();
             }
 
             BenchmarkRunner.Run<SerializerBenchmark>();

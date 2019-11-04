@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using SimpleRpc.Serialization;
 using SimpleRpc.Serialization.Ceras;
 using SimpleRpc.Serialization.Hyperion;
+using AutoFixture;
 
 namespace SimpleRpc.Benchmarks
 {
@@ -21,8 +21,8 @@ namespace SimpleRpc.Benchmarks
             _ceras = new CerasMessageSerializer();
             _hyperion = new HyperionMessageSerializer();
 
-            _ceras.SerializeAsync(_serializedCeras, _data, _data.GetType()).GetAwaiter().GetResult();
             _hyperion.SerializeAsync(_serializedWire, _data, _data.GetType()).GetAwaiter().GetResult();
+            _ceras.SerializeAsync(_serializedCeras, _data, _data.GetType()).GetAwaiter().GetResult();
         }
 
         private CerasMessageSerializer _ceras;
@@ -82,45 +82,13 @@ namespace SimpleRpc.Benchmarks
         {
             for (int i = 0; i < 1000; i++)
             {
-                var data = new TestClass()
-                {
-                    Exception = new Exception("Test message", new ArgumentNullException("param", "Cannot be null")),
-                    DateTime = new DateTime(1944, 6, 6), // DDay
-                    Enum = TestEnum.Five,
-                    String = "On June 6, 1944, more than 160,000 Allied troops landed along a 50-mile stretch of heavily-fortified French coastline",
-                    Struct = new TestStruct()
-                    {
-                        Boolean = true,
-                        Long = long.MaxValue,
-                        Decimal = decimal.MinusOne,
-                        Double = double.MaxValue,
-                        Int = int.MaxValue,
-                        Short = short.MaxValue,
-                        ULong = ulong.MinValue,
-                        Byte = byte.MaxValue,
-                        Char = char.MaxValue,
-                        Float = float.MinValue,
-                        UShort = ushort.MinValue,
-                        UInt = uint.MaxValue,
-                        Sbyte = sbyte.MaxValue,
-                        StringField = "On June 6, 1944, more than 160,000 Allied troops landed along a 50-mile stretch of heavily-fortified French coastline",
-                    },
-                    Decimal = decimal.MaxValue,
-                    Float = float.MaxValue,
-                    Long = long.MinValue,
-                    Int = int.MinValue,
-                    Double = double.Epsilon,
-                    Char = char.MaxValue,
-                    Byte = byte.MaxValue,
-                    Sbyte = sbyte.MaxValue,
-                    Short = short.MaxValue,
-                    UInt = uint.MaxValue,
-                    ULong = ulong.MaxValue,
-                    UShort = ushort.MaxValue,
-                    Boolean = true
-                };
+                Fixture fixture = new Fixture();
+                var customization = new SupportMutableValueTypesCustomization();
+                customization.Customize(fixture);
 
-                _data.Add(data);
+                var fixt = fixture.Create<TestClass>();
+
+                _data.Add(fixt);
             }
         }
     }
