@@ -7,30 +7,24 @@ namespace SimpleRpc
 {
     public class MethodModel
     {
-        public MethodModel(Type declaringType, string methodName, Type[] parameterTypes, Type[] genericArguments)
+        public static MethodModel Create(MethodInfo method, Type[] genericArguments) 
         {
-            DeclaringType = declaringType;
-            MethodName = methodName;
-            ParameterTypes = parameterTypes;
-            GenericArguments = genericArguments;
+            return new MethodModel
+            {
+                DeclaringType = method.DeclaringType,
+                MethodName = method.Name,
+                ParameterTypes = method.GetParameters().Select(t => t.ParameterType).ToArray(),
+                GenericArguments = genericArguments,
+            };
         }
 
-        public MethodModel(MethodInfo method, Type[] genericArguments) :
-            this(
-                method.DeclaringType,
-                method.Name,
-                method.GetParameters().Select(t => t.ParameterType).ToArray(),
-                genericArguments)
-        {
-        }
+        public Type DeclaringType { get; set; }
 
-        public Type DeclaringType { get; }
+        public string MethodName { get; set; }
 
-        public string MethodName { get; }
+        public Type[] ParameterTypes { get; set; }
 
-        public Type[] ParameterTypes { get; }
-
-        public Type[] GenericArguments { get; }
+        public Type[] GenericArguments { get; set; }
     }
 
     public sealed class MethodModelEqualityComparer : IEqualityComparer<MethodModel>

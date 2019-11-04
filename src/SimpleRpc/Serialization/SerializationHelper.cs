@@ -24,7 +24,7 @@ namespace SimpleRpc.Serialization
 
         public IMessageSerializer TryGetByTypeName(string typeName)
         {
-            if (_typeNameSerializer.TryGetValue(typeName, out var serializer))
+            if (typeName != null && _typeNameSerializer.TryGetValue(typeName, out var serializer))
             {
                 return serializer;
             }

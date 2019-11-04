@@ -51,7 +51,6 @@ namespace SimpleRpc.Serialization.Ceras
                     //t.TypeConstruction = TypeConstruction.ByConstructor()
                 };
 
-                config.ConfigType<MethodModel>().ConstructBy(() => new MethodModel(null, null, null, null));
                 return new CerasSerializer(config);
             });
 

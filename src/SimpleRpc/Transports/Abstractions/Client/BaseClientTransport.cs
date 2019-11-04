@@ -24,7 +24,7 @@ namespace SimpleRpc.Transports.Abstractions.Client
         {
             var rpcRequest = new RpcRequest
             {
-                Method = new MethodModel(invocation.Method, invocation.GenericArguments),
+                Method = MethodModel.Create(invocation.Method, invocation.GenericArguments),
                 Parameters = invocation.Arguments
             };
 
