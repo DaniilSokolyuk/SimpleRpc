@@ -28,7 +28,7 @@ namespace SimpleRpc.Serialization.Wire
 
                 pooledStream.Position = 0;
 
-                await Utils.CopyToDestAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
+                await Utils.CopyToAsync(pooledStream, stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -41,7 +41,7 @@ namespace SimpleRpc.Serialization.Wire
 
             using (var pooledStream = Utils.StreamManager.GetStream())
             {
-                await Utils.CopyFromSourceAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
+                await Utils.CopyToAsync(stream, pooledStream, cancellationToken).ConfigureAwait(false);
 
                 pooledStream.Position = 0;
 

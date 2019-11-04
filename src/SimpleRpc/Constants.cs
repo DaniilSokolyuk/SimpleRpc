@@ -12,6 +12,8 @@
             public static string Wire = "wire";
 
             public static string MessagePack = "msgpack";
+
+            public static string Ceras = "ceras";
         }
     }
 }

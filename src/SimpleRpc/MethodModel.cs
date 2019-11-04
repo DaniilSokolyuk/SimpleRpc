@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MessagePack;
 
 namespace SimpleRpc
 {
-    [MessagePackObject]
     public class MethodModel
     {
-        [SerializationConstructor]
         public MethodModel(Type declaringType, string methodName, Type[] parameterTypes, Type[] genericArguments)
         {
             DeclaringType = declaringType;
@@ -27,16 +24,12 @@ namespace SimpleRpc
         {
         }
 
-        [Key(0)]
         public Type DeclaringType { get; }
 
-        [Key(1)]
         public string MethodName { get; }
 
-        [Key(2)]
         public Type[] ParameterTypes { get; }
 
-        [Key(3)]
         public Type[] GenericArguments { get; }
     }
 

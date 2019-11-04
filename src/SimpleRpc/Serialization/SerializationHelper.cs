@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using SimpleRpc.Serialization.MsgPack;
 using SimpleRpc.Serialization.Wire;
 
 namespace SimpleRpc.Serialization
@@ -13,7 +12,7 @@ namespace SimpleRpc.Serialization
         static SerializationHelper()
         {
             Add(new WireMessageSerializer());
-            Add(new MsgPackSerializer());
+            Add(new CerasMessageSerializer());
         }
 
         public static void Add(IMessageSerializer serializer)

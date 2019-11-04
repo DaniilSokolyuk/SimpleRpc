@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRpc", "src\SimpleRpc\SimpleRpc.csproj", "{310A784D-C6BA-48C6-95EC-64584044C6AF}"
 EndProject
@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRpc.Sample.Shared", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C6DF78B3-33E3-42BF-BBF2-9A0385D3239C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRpc.Tests", "tests\SimpleRpc.Tests\SimpleRpc.Tests.csproj", "{6970FEAA-9041-4046-B31D-958DF5491946}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRpc.Tests", "tests\SimpleRpc.Tests\SimpleRpc.Tests.csproj", "{6970FEAA-9041-4046-B31D-958DF5491946}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRpc.Benchmarks", "tests\SimpleRpc.Benchmarks\SimpleRpc.Benchmarks.csproj", "{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,10 @@ Global
 		{6970FEAA-9041-4046-B31D-958DF5491946}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6970FEAA-9041-4046-B31D-958DF5491946}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6970FEAA-9041-4046-B31D-958DF5491946}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +58,7 @@ Global
 		{CA72B26A-8E74-48B5-A03C-B698136E4085} = {DA391D7F-07D9-463B-95BC-0F3E966FA597}
 		{12693C0C-07A3-4BDF-9493-A3FECFB7EE7C} = {DA391D7F-07D9-463B-95BC-0F3E966FA597}
 		{6970FEAA-9041-4046-B31D-958DF5491946} = {C6DF78B3-33E3-42BF-BBF2-9A0385D3239C}
+		{13CD0B54-15D7-4F4B-9BEF-0967B996B03A} = {C6DF78B3-33E3-42BF-BBF2-9A0385D3239C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {167381ED-EE6D-483A-8C67-5CDCC12E50B2}
