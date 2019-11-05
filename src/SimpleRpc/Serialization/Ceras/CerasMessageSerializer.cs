@@ -58,12 +58,12 @@ namespace SimpleRpc.Serialization.Ceras
                 {
                     t.TargetMembers = TargetMember.AllPublic;
 
+                    t.TypeConstruction = TypeConstruction.ByUninitialized();
+
                     if (typeof(Exception).IsAssignableFrom(t.Type))
                     {
                         t.TargetMembers = TargetMember.All;
                     }
-
-                    //t.TypeConstruction = TypeConstruction.ByConstructor()
                 };
 
                 return new CerasSerializer(config);

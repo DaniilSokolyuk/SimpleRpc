@@ -7,15 +7,21 @@ namespace SimpleRpc
 {
     public class MethodModel
     {
-        public static MethodModel Create(MethodInfo method, Type[] genericArguments) 
+        public MethodModel(Type declaringType, string methodName, Type[] parameterTypes, Type[] genericArguments)
         {
-            return new MethodModel
-            {
-                DeclaringType = method.DeclaringType,
-                MethodName = method.Name,
-                ParameterTypes = method.GetParameters().Select(t => t.ParameterType).ToArray(),
-                GenericArguments = genericArguments,
-            };
+            DeclaringType = declaringType;
+            MethodName = methodName;
+            ParameterTypes = parameterTypes;
+            GenericArguments = genericArguments;
+        }
+
+        public MethodModel(MethodInfo method, Type[] genericArguments) :
+            this(
+                method.DeclaringType,
+                method.Name,
+                method.GetParameters().Select(t => t.ParameterType).ToArray(),
+                genericArguments)
+        {
         }
 
         public Type DeclaringType { get; set; }
