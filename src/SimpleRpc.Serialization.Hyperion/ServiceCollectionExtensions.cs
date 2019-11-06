@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SimpleRpc.Serialization;
 
 namespace SimpleRpc.Serialization.Hyperion
 {

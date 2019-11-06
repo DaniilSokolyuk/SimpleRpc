@@ -37,7 +37,7 @@ namespace SimpleRpc.Serialization
                     SerializerBinary.WriteInt32Fixed(ref compressedBuff, ref offset, compressedLength);
                     SerializerBinary.WriteInt32Fixed(ref compressedBuff, ref offset, uncompressed.Length);
 
-                    await stream.WriteAsync(compressedBuff, 0, compressedLength + HeaderLength).ConfigureAwait(false);
+                    await stream.WriteAsync(compressedBuff, 0, compressedLength + HeaderLength, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -50,19 +50,19 @@ namespace SimpleRpc.Serialization
 
         public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
-            var lengthBuffer = new byte[9];
-            await stream.ReadAsync(lengthBuffer, 0, HeaderLength, cancellationToken);
+            var headerBuffer = new byte[9];
+            await stream.ReadAsync(headerBuffer, 0, HeaderLength, cancellationToken).ConfigureAwait(false);
 
             var offset = 0;
-            var header = SerializerBinary.ReadByte(lengthBuffer, ref offset); 
+            var header = SerializerBinary.ReadByte(headerBuffer, ref offset); 
             if (header != Header) throw new Exception("Not expected header error");
-            var compressedLength = SerializerBinary.ReadInt32Fixed(lengthBuffer, ref offset);
-            var uncompressedLength = SerializerBinary.ReadInt32Fixed(lengthBuffer, ref offset);
+            var compressedLength = SerializerBinary.ReadInt32Fixed(headerBuffer, ref offset);
+            var uncompressedLength = SerializerBinary.ReadInt32Fixed(headerBuffer, ref offset);
 
             var buffer = ArrayPool<byte>.Shared.Rent(compressedLength + uncompressedLength);
             try
             {
-                await stream.ReadAsync(buffer, 0, compressedLength).ConfigureAwait(false);
+                await stream.ReadAsync(buffer, 0, compressedLength, cancellationToken).ConfigureAwait(false);
 
                 LZ4Codec.Decode(
                         buffer, 0, compressedLength,

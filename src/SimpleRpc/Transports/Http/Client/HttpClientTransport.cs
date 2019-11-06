@@ -49,7 +49,15 @@ namespace SimpleRpc.Transports.Http.Client
             var httpClient = _httpClientFactory.CreateClient(_clientName);
 
             using (var streamContent = new SerializbleContent(_serializer, rpcRequest))
-            using (var httpResponseMessage = await httpClient.PostAsync(string.Empty, streamContent, CancellationToken.None).ConfigureAwait(false))
+            using (var httpResponseMessage = await httpClient.SendAsync(
+                new HttpRequestMessage
+                {
+                    Content = streamContent,
+                    Method = HttpMethod.Post,
+                },
+                HttpCompletionOption.ResponseHeadersRead,
+                CancellationToken.None).ConfigureAwait(false)
+            )
             {
                 httpResponseMessage.EnsureSuccessStatusCode();
 
@@ -85,7 +93,7 @@ namespace SimpleRpc.Transports.Http.Client
         {
             return _serializer.SerializeAsync(stream, _request, typeof(RpcRequest));
         }
-        
+
         protected override bool TryComputeLength(out long length)
         {
             //we don't know. can't be computed up-front
