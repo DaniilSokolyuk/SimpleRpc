@@ -9,22 +9,22 @@ namespace SimpleRpc.Serialization.Ceras
 {
     public sealed class CerasMessageSerializer : BaseLZ4CompressSerializer
     {
-        private struct CerasMemoryOwner : IMemoryOwner<byte>
+        private readonly struct CerasMemoryOwner : IMemoryOwner<byte>
         {
-            byte[] _underlayingArray;
-            int _length;
+            private readonly byte[] _underlyingArray;
+            private readonly int _length;
 
             public CerasMemoryOwner(byte[] array, int length)
             {
-                _underlayingArray = array;
+                _underlyingArray = array;
                 _length = length;
             }
 
-            public Memory<byte> Memory => new Memory<byte>(_underlayingArray, 0, _length);
+            public Memory<byte> Memory => new Memory<byte>(_underlyingArray, 0, _length);
 
             public void Dispose()
             {
-                CerasBufferPool.Pool.Return(_underlayingArray);
+                CerasBufferPool.Pool.Return(_underlyingArray);
             }
         }
 
