@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
         <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
         <VersionPrefix>1.0.0-beta1</VersionPrefix>
         <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>

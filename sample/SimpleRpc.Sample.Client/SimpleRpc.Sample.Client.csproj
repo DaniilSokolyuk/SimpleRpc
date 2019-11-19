@@ -8,9 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SimpleRpc.Serialization.Hyperion\SimpleRpc.Serialization.Hyperion.csproj" />
     <ProjectReference Include="..\..\src\SimpleRpc\SimpleRpc.csproj" />
     <ProjectReference Include="..\SimpleRpc.Sample.Shared\SimpleRpc.Sample.Shared.csproj" />
   </ItemGroup>

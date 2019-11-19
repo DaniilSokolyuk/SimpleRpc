@@ -11,6 +11,6 @@ namespace SimpleRpc.Serialization
 
         Task SerializeAsync(Stream stream, object message, Type type, CancellationToken cancellationToken = default);
 
-        ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default);
+        Task<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default);
     }
 }

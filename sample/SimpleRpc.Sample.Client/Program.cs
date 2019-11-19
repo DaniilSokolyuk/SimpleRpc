@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleRpc.Sample.Shared;
+using SimpleRpc.Serialization.Hyperion;
 using SimpleRpc.Transports;
 using SimpleRpc.Transports.Http.Client;
+using System.Collections;
 
 namespace SimpleRpc.Sample.Client
 {
@@ -19,7 +21,9 @@ namespace SimpleRpc.Sample.Client
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions
             {
                 Url = "http://127.0.0.1:5000/rpc",
-            });
+                Serializer = "HyperionMessageSerializer"
+            })
+                .AddSimpleRpcHyperionSerializer();
 
             sc.AddSimpleRpcProxy<IFooService>("sample");
             // or
@@ -29,7 +33,8 @@ namespace SimpleRpc.Sample.Client
 
             var service = pr.GetService<IFooService>();
 
-
+            var tt = typeof(ICollection<string>);
+                
             service.Plus(1, 5);
             Console.WriteLine(service.Concat("Foo", "Bar"));
 

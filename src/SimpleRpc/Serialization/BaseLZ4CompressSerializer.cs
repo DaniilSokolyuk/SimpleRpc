@@ -48,7 +48,7 @@ namespace SimpleRpc.Serialization
 
         public abstract object DeserializeCore(byte[] buffer, int offset, int uncompressedLength);
 
-        public async ValueTask<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
+        public async Task<object> DeserializeAsync(Stream stream, Type type, CancellationToken cancellationToken = default)
         {
             var headerBuffer = new byte[9];
             await stream.ReadAsync(headerBuffer, 0, HeaderLength, cancellationToken).ConfigureAwait(false);

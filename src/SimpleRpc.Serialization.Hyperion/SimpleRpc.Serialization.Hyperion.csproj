@@ -1,14 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyName>SimpleRpc.Serialization.Hyperion</AssemblyName>
-        <RootNamespace>SimpleRpc.Serialization.Hyperion</RootNamespace>
+        <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+        <Description>Hyperion serializer for SimpleRpc library</Description>
+        <VersionPrefix>1.0.0-beta1</VersionPrefix>
+        <PackageTags>rpc;simplerpc;easyrpc;hyperion</PackageTags>
+        <Authors>Daniil Sokolyuk</Authors>
+        <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/DaniilSokolyuk/SimpleRpc</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <LangVersion>7.2</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hyperion" Version="0.9.10" />
+        <PackageReference Include="Hyperion" Version="0.9.11" />
     </ItemGroup>
 
     <ItemGroup>

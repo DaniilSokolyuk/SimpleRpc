@@ -6,6 +6,7 @@ using SimpleRpc.Sample.Shared;
 using SimpleRpc.Transports;
 using SimpleRpc.Transports.Http.Server;
 using SimpleRPC.Sample.Server;
+using SimpleRpc.Serialization.Hyperion;
 
 namespace SimpleRpc.Sample.Server
 {
@@ -20,7 +21,8 @@ namespace SimpleRpc.Sample.Server
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSimpleRpcServer(new HttpServerTransportOptions { Path = "/rpc" });
+            services.AddSimpleRpcServer(new HttpServerTransportOptions { Path = "/rpc" })
+                .AddSimpleRpcHyperionSerializer();
 
             services.AddSingleton<IFooService, FooServiceImpl>();
         }
