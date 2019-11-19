@@ -11,9 +11,6 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <!--<SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\build\key.snk</AssemblyOriginatorKeyFile>-->
-
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
         <LangVersion>7.2</LangVersion>
@@ -41,9 +38,11 @@
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
         <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
         <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.6.0" />
-        <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
-
     </ItemGroup>
 
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+        <Reference Include="System" />
+        <Reference Include="Microsoft.CSharp" />
+    </ItemGroup>
 
 </Project>
