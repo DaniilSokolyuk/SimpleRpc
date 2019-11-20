@@ -1,10 +1,12 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="IlExpression.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="IlExpression.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
-#if NET461
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -12,14 +14,14 @@ using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-
-    public abstract class IlExpression
+#if NET45
+    internal abstract class IlExpression
     {
         public abstract void Emit(IlCompilerContext ctx);
         public abstract Type Type();
     }
 
-    public class IlBool : IlExpression
+    internal sealed class IlBool : IlExpression
     {
         private readonly bool _value;
 
@@ -37,17 +39,16 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => typeof(bool);
     }
 
-    public class IlRuntimeConstant : IlExpression
+    internal sealed class IlRuntimeConstant : IlExpression
     {
         private readonly object _object;
+        public int Index { get; }
 
         public IlRuntimeConstant(object value, int index)
         {
             _object = value;
             Index = index;
         }
-
-        public int Index { get; }
 
         public override void Emit(IlCompilerContext ctx)
         {
@@ -60,7 +61,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _object.GetType();
     }
 
-    public class IlReadField : IlExpression
+    internal sealed class IlReadField : IlExpression
     {
         private readonly FieldInfo _field;
         private readonly IlExpression _target;
@@ -81,10 +82,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _field.FieldType;
     }
 
-    public class IlWriteVariable : IlExpression
+    internal sealed class IlWriteVariable : IlExpression
     {
-        private readonly IlExpression _value;
         private readonly IlVariable _variable;
+        private readonly IlExpression _value;
 
         public IlWriteVariable(IlVariable variable, IlExpression value)
         {
@@ -105,7 +106,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         }
     }
 
-    public class IlWriteField : IlExpression
+    internal sealed class IlWriteField : IlExpression
     {
         private readonly FieldInfo _field;
         private readonly IlExpression _target;
@@ -132,7 +133,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         }
     }
 
-    public class IlNew : IlExpression
+    internal sealed class IlNew : IlExpression
     {
         private readonly Type _type;
 
@@ -152,8 +153,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _type;
     }
 
-    public class IlParameter : IlExpression
+    internal sealed class IlParameter : IlExpression
     {
+        public string Name { get; }
+        public int ParameterIndex { get; }
         private readonly Type _type;
 
         public IlParameter(int parameterIndex, Type type, string name)
@@ -162,9 +165,6 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             ParameterIndex = parameterIndex;
             _type = type;
         }
-
-        public string Name { get; }
-        public int ParameterIndex { get; }
 
         public override void Emit(IlCompilerContext ctx)
         {
@@ -175,18 +175,18 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _type;
     }
 
-    public class IlVariable : IlExpression
+    internal sealed class IlVariable : IlExpression
     {
+        public int VariableIndex { get; }
+        public string Name { get; }
+        public Type VarType { get; }
+
         public IlVariable(int variableIndex, Type type, string name)
         {
             VariableIndex = variableIndex;
             Name = name;
             VarType = type;
         }
-
-        public int VariableIndex { get; }
-        public string Name { get; }
-        public Type VarType { get; }
 
         public override void Emit(IlCompilerContext ctx)
         {
@@ -197,10 +197,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => VarType;
     }
 
-    public class IlCastClass : IlExpression
+    internal sealed class IlCastClass : IlExpression
     {
-        private readonly IlExpression _expression;
         private readonly Type _type;
+        private readonly IlExpression _expression;
 
         public IlCastClass(Type type, IlExpression expression)
         {
@@ -219,10 +219,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _type;
     }
 
-    public class IlBox : IlExpression
+    internal sealed class IlBox : IlExpression
     {
-        private readonly IlExpression _expression;
         private readonly Type _type;
+        private readonly IlExpression _expression;
 
         public IlBox(Type type, IlExpression expression)
         {
@@ -239,10 +239,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => typeof(object);
     }
 
-    public class IlUnbox : IlExpression
+    internal sealed class IlUnbox : IlExpression
     {
-        private readonly IlExpression _expression;
         private readonly Type _type;
+        private readonly IlExpression _expression;
 
         public IlUnbox(Type type, IlExpression expression)
         {
@@ -259,18 +259,16 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public override Type Type() => _type;
     }
 
-    public class IlCall : IlExpression
+    internal sealed class IlCall : IlExpression
     {
-        private readonly IlExpression[] _args;
-        private readonly MethodInfo _method;
         private readonly IlExpression _target;
+        private readonly MethodInfo _method;
+        private readonly IlExpression[] _args;
 
         public IlCall(IlExpression target, MethodInfo method, params IlExpression[] args)
         {
             if (args.Length != method.GetParameters().Length)
-            {
                 throw new ArgumentException("Parameter count mismatch", nameof(args));
-            }
 
             _target = target;
             _method = method;
@@ -287,33 +285,25 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
                 ctx.StackDepth--;
             }
             if (_method.IsVirtual)
-            {
                 ctx.Il.EmitCall(OpCodes.Callvirt, _method, null);
-            }
             else
-            {
                 ctx.Il.EmitCall(OpCodes.Call, _method, null);
-            }
             if (_method.ReturnType != typeof(void))
-            {
                 ctx.StackDepth++;
-            }
         }
 
         public override Type Type() => _method.ReturnType;
     }
 
-    public class IlCallStatic : IlExpression
+    internal sealed class IlCallStatic : IlExpression
     {
-        private readonly IlExpression[] _args;
         private readonly MethodInfo _method;
+        private readonly IlExpression[] _args;
 
         public IlCallStatic(MethodInfo method, params IlExpression[] args)
         {
             if (args.Length != method.GetParameters().Length)
-            {
                 throw new ArgumentException("Parameter count mismatch", nameof(args));
-            }
 
             _method = method;
             _args = args;
@@ -328,13 +318,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             }
             ctx.Il.EmitCall(OpCodes.Call, _method, null);
             if (_method.ReturnType != typeof(void))
-            {
                 ctx.StackDepth++;
-            }
         }
 
         public override Type Type() => _method.ReturnType;
     }
-
-}
 #endif
+}

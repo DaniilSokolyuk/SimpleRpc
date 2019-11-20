@@ -1,16 +1,18 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="UInt64Serializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="UInt64Serializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class UInt64Serializer : SessionAwareByteArrayRequiringValueSerializer<ulong>
+    internal sealed class UInt64Serializer : SessionAwareByteArrayRequiringValueSerializer<ulong>
     {
         public const byte Manifest = 19;
         public const int Size = sizeof(ulong);
@@ -19,8 +21,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         public UInt64Serializer() : base(Manifest, () => WriteValueImpl, () => ReadValueImpl)
         {
         }
-
-        public override int PreallocatedByteBufferSize => Size;
 
         public static void WriteValueImpl(Stream stream, ulong ul, byte[] bytes)
         {
@@ -33,5 +33,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             stream.Read(bytes, 0, Size);
             return BitConverter.ToUInt64(bytes, 0);
         }
+
+        public override int PreallocatedByteBufferSize => Size;
     }
 }

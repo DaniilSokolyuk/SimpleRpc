@@ -1,16 +1,18 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="CharSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="CharSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class CharSerializer : SessionAwareByteArrayRequiringValueSerializer<char>
+    internal sealed class CharSerializer : SessionAwareByteArrayRequiringValueSerializer<char>
     {
         public const byte Manifest = 15;
         public const int Size = sizeof(char);
@@ -19,8 +21,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         public CharSerializer() : base(Manifest, () => WriteValueImpl, () => ReadValueImpl)
         {
         }
-
-        public override int PreallocatedByteBufferSize => Size;
 
         public static char ReadValueImpl(Stream stream, byte[] bytes)
         {
@@ -33,5 +33,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             NoAllocBitConverter.GetBytes(ch, bytes);
             stream.Write(bytes, 0, Size);
         }
+
+        public override int PreallocatedByteBufferSize => Size;
     }
 }

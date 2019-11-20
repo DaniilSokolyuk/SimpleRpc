@@ -1,10 +1,12 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="IlCompiler.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//       Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
-#if NET461
+//  <copyright file="IlCompiler.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
+
 using System;
 using System.Linq;
 using System.Reflection;
@@ -12,8 +14,8 @@ using System.Reflection.Emit;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-
-    public class IlCompiler<TDel> : IlBuilder, ICompiler<TDel>
+#if NET45
+    internal sealed class IlCompiler<TDel> : IlBuilder, ICompiler<TDel>
     {
         public TDel Compile()
         {
@@ -55,15 +57,11 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
 
             //if we have a return type, it's OK that there is one item on the stack
             if (returnType != typeof(void))
-            {
                 context.StackDepth--;
-            }
 
             //if the stack is not aligned, there is some error
             if (context.StackDepth != 0)
-            {
                 throw new NotSupportedException("Stack error");
-            }
 
             var del = (TDel) (object) method.CreateDelegate(typeof(TDel), self);
 
@@ -80,9 +78,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         private object BuildSelf()
         {
             if (!Constants.Any())
-            {
                 return null;
-            }
 
             //TODO: a tuple will not be enough, we need arbitrary many constants.
             //just emit the state object instead.
@@ -97,6 +93,5 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return self;
         }
     }
-
-}
 #endif
+}

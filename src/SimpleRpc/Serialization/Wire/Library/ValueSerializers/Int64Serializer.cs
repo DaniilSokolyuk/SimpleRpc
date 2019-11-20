@@ -1,16 +1,18 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="Int64Serializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="Int64Serializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class Int64Serializer : SessionAwareByteArrayRequiringValueSerializer<long>
+    internal sealed class Int64Serializer : SessionAwareByteArrayRequiringValueSerializer<long>
     {
         public const byte Manifest = 2;
         public const int Size = sizeof(long);
@@ -19,8 +21,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         public Int64Serializer() : base(Manifest, () => WriteValueImpl, () => ReadValueImpl)
         {
         }
-
-        public override int PreallocatedByteBufferSize => Size;
 
         public static void WriteValueImpl(Stream stream, long l, byte[] bytes)
         {
@@ -33,5 +33,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             stream.Read(bytes, 0, Size);
             return BitConverter.ToInt64(bytes, 0);
         }
+
+        public override int PreallocatedByteBufferSize => Size;
     }
 }

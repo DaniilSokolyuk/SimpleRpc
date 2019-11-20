@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ExpressionEx.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ExpressionEx.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Linq.Expressions;
@@ -11,13 +14,13 @@ using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-    public static class ExpressionEx
+    internal static class ExpressionEx
     {
         public static ConstantExpression ToConstant(this object self)
         {
             return Expression.Constant(self);
         }
-
+        
         public static Expression GetNewExpression(Type type)
         {
             if (type.GetTypeInfo().IsValueType)
@@ -26,8 +29,8 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
                 var convert = Expression.Convert(x, typeof(object));
                 return convert;
             }
-#if NET461
-            var defaultCtor = type.GetTypeInfo().GetConstructor(new Type[] {});
+#if SERIALIZATION
+            var defaultCtor = type.GetTypeInfo().GetConstructor(new Type[] { });
             var il = defaultCtor?.GetMethodBody()?.GetILAsByteArray();
             var sideEffectFreeCtor = il != null && il.Length <= 8; //this is the size of an empty ctor
             if (sideEffectFreeCtor)

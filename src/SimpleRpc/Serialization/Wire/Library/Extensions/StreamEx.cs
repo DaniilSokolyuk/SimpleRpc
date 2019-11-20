@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="StreamEx.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="StreamEx.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -10,27 +13,24 @@ using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
 namespace SimpleRpc.Serialization.Wire.Library.Extensions
 {
-    public static class StreamEx
+    internal static class StreamEx
     {
+
         public static uint ReadVarint32(this Stream stream)
         {
-            var result = 0;
-            var offset = 0;
+            int result = 0;
+            int offset = 0;
 
             for (; offset < 32; offset += 7)
             {
-                var b = stream.ReadByte();
+                int b = stream.ReadByte();
                 if (b == -1)
-                {
                     throw new EndOfStreamException();
-                }
 
                 result |= (b & 0x7f) << offset;
 
                 if ((b & 0x80) == 0)
-                {
-                    return (uint) result;
-                }
+                    return (uint)result;
             }
 
             throw new InvalidDataException();
@@ -39,32 +39,26 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         public static void WriteVarint32(this Stream stream, uint value)
         {
             for (; value >= 0x80u; value >>= 7)
-            {
-                stream.WriteByte((byte) (value | 0x80u));
-            }
+                stream.WriteByte((byte)(value | 0x80u));
 
-            stream.WriteByte((byte) value);
+            stream.WriteByte((byte)value);
         }
 
         public static ulong ReadVarint64(this Stream stream)
         {
             long result = 0;
-            var offset = 0;
+            int offset = 0;
 
             for (; offset < 64; offset += 7)
             {
-                var b = stream.ReadByte();
+                int b = stream.ReadByte();
                 if (b == -1)
-                {
                     throw new EndOfStreamException();
-                }
 
-                result |= (long) (b & 0x7f) << offset;
+                result |= ((long)(b & 0x7f)) << offset;
 
                 if ((b & 0x80) == 0)
-                {
-                    return (ulong) result;
-                }
+                    return (ulong)result;
             }
 
             throw new InvalidDataException();
@@ -73,11 +67,9 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         public static void WriteVarint64(this Stream stream, ulong value)
         {
             for (; value >= 0x80u; value >>= 7)
-            {
-                stream.WriteByte((byte) (value | 0x80u));
-            }
+                stream.WriteByte((byte)(value | 0x80u));
 
-            stream.WriteByte((byte) value);
+            stream.WriteByte((byte)value);
         }
 
         public static uint ReadUInt16(this Stream self, DeserializerSession session)
@@ -104,9 +96,9 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             return buffer;
         }
 
-        public static void WriteLengthEncodedByteArray(this Stream self, byte[] bytes, SerializerSession session)
+        public static void WriteLengthEncodedByteArray(this Stream self, byte[] bytes,SerializerSession session)
         {
-            Int32Serializer.WriteValueImpl(self, bytes.Length, session);
+            Int32Serializer.WriteValueImpl(self,bytes.Length,session);
             self.Write(bytes, 0, bytes.Length);
         }
 
@@ -123,7 +115,8 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             }
             else
             {
-                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(value, out int existingId))
+                int existingId;
+                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(value, out existingId))
                 {
                     //write the serializer manifest
                     ObjectReferenceSerializer.Instance.WriteManifest(stream, session);
@@ -133,7 +126,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
                 else
                 {
                     var vType = value.GetType();
-                    var s2 = session.Serializer.GetSerializerByType(vType);
+                    var s2  = session.Serializer.GetSerializerByType(vType);
                     s2.WriteManifest(stream, session);
                     s2.WriteValue(stream, value, session);
                 }
@@ -149,7 +142,8 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             }
             else
             {
-                if (preserveObjectReferences && session.TryGetObjectId(value, out int existingId))
+                int existingId;
+                if (preserveObjectReferences && session.TryGetObjectId(value, out existingId))
                 {
                     //write the serializer manifest
                     ObjectReferenceSerializer.Instance.WriteManifest(stream, session);

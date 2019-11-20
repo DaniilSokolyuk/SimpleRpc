@@ -1,23 +1,27 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="DefaultCodeGenerator.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="DefaultCodeGenerator.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using SimpleRpc.Serialization.Wire.Library.Compilation;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.Internal;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
-namespace SimpleRpc.Serialization.Wire.Library.Compilation
+namespace SimpleRpc.Serialization.Wire.Library
 {
-    public class DefaultCodeGenerator : ICodeGenerator
+    internal class DefaultCodeGenerator : ICodeGenerator
     {
-        public const string PreallocatedByteBuffer = nameof(PreallocatedByteBuffer);
+        public const string PreallocatedByteBuffer = "PreallocatedByteBuffer";
 
         public void BuildSerializer([NotNull] Serializer serializer, [NotNull] ObjectSerializer objectSerializer)
         {
@@ -31,7 +35,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         }
 
         private ObjectReader GetFieldsReader([NotNull] Serializer serializer, [NotNull] FieldInfo[] fields,
-                                             [NotNull] Type type)
+            [NotNull] Type type)
         {
             var c = new Compiler<ObjectReader>();
             var stream = c.Parameter<Stream>("stream");
@@ -76,7 +80,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             if (preallocatedBufferSize > 0)
             {
                 EmitPreallocatedBuffer(c, preallocatedBufferSize, session,
-                                       typeof(DeserializerSession).GetTypeInfo().GetMethod(nameof(DeserializerSession.GetBuffer)));
+                    typeof(DeserializerSession).GetTypeInfo().GetMethod(nameof(DeserializerSession.GetBuffer)));
             }
 
             for (var i = 0; i < fields.Length; i++)
@@ -85,7 +89,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
                 var s = serializers[i];
 
                 int read;
-                if (!serializer.Options.VersionTolerance && field.FieldType.IsWirePrimitive())
+                if (!serializer.Options.VersionTolerance && field.FieldType.IsHyperionPrimitive())
                 {
                     //Only optimize if property names are not included.
                     //if they are included, we need to be able to skip past unknown property data
@@ -100,17 +104,8 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
                     read = c.Convert(read, field.FieldType);
                 }
 
-                if (field.IsInitOnly)
-                {
-                    var assignReadToField = c.WriteReadonlyField(field, target, read);
-                    c.Emit(assignReadToField);
-                }
-                else
-                {
-                    var assignReadToField = c.WriteField(field, typedTarget, read);
-                    c.Emit(assignReadToField);
-                }
-
+                var assignReadToField = c.WriteField(field, typedTarget, target, read);
+                c.Emit(assignReadToField);
             }
             c.Emit(target);
 
@@ -119,7 +114,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         }
 
         private static void EmitPreallocatedBuffer<T>(ICompiler<T> c, int preallocatedBufferSize, int session,
-                                                      MethodInfo getBuffer)
+            MethodInfo getBuffer)
         {
             var size = c.Constant(preallocatedBufferSize);
             var buffer = c.Variable<byte[]>(PreallocatedByteBuffer);
@@ -131,7 +126,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         //this generates a FieldWriter that writes all fields by unrolling all fields and calling them individually
         //no loops involved
         private ObjectWriter GetFieldsWriter([NotNull] Serializer serializer, [NotNull] IEnumerable<FieldInfo> fields,
-                                             out int preallocatedBufferSize)
+            out int preallocatedBufferSize)
         {
             var c = new Compiler<ObjectWriter>();
 
@@ -149,20 +144,21 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             }
 
             var fieldsArray = fields.ToArray();
-            var serializers = fieldsArray.Select(field => serializer.GetSerializerByType(field.FieldType)).ToArray();
+            var serializers = fieldsArray.Select(field => 
+                serializer.GetSerializerByType(field.FieldType)).ToArray();
 
             preallocatedBufferSize = serializers.Length != 0 ? serializers.Max(s => s.PreallocatedByteBufferSize) : 0;
 
             if (preallocatedBufferSize > 0)
             {
                 EmitPreallocatedBuffer(c, preallocatedBufferSize, session,
-                                       typeof(SerializerSession).GetTypeInfo().GetMethod("GetBuffer"));
+                    typeof(SerializerSession).GetTypeInfo().GetMethod("GetBuffer"));
             }
 
             for (var i = 0; i < fieldsArray.Length; i++)
             {
                 var field = fieldsArray[i];
-                //get the serializer for the type of the field
+//get the serializer for the type of the field
                 var valueSerializer = serializers[i];
                 //runtime Get a delegate that reads the content of the given field
 
@@ -170,7 +166,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
                 var readField = c.ReadField(field, cast);
 
                 //if the type is one of our special primitives, ignore manifest as the content will always only be of this type
-                if (!serializer.Options.VersionTolerance && field.FieldType.IsWirePrimitive())
+                if (!serializer.Options.VersionTolerance && field.FieldType.IsHyperionPrimitive())
                 {
                     //primitive types does not need to write any manifest, if the field type is known
                     valueSerializer.EmitWriteValue(c, stream, readField, session);

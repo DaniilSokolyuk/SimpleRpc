@@ -13,19 +13,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using SimpleRpc.Serialization.Wire.Library.Internal;
-
-#if NET461
-
-#endif
 
 namespace SimpleRpc.Serialization.Wire.Library.Extensions
 {
-    public static class TypeEx
+    internal static class TypeEx
     {
-        const string VERSION_REGEX = @", Version=(\d+([.]\d+)?([.]\d+)?([.]\d+)?.*?)";
         //Why not inline typeof you ask?
         //Because it actually generates calls to get the type.
         //We prefetch all primitives here
@@ -40,6 +33,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         public static readonly Type SByteType = typeof(sbyte);
         public static readonly Type BoolType = typeof(bool);
         public static readonly Type DateTimeType = typeof(DateTime);
+        public static readonly Type DateTimeOffsetType = typeof(DateTimeOffset);
         public static readonly Type StringType = typeof(string);
         public static readonly Type GuidType = typeof(Guid);
         public static readonly Type FloatType = typeof(float);
@@ -50,7 +44,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         public static readonly Type TypeType = typeof(Type);
         public static readonly Type RuntimeType = Type.GetType("System.RuntimeType");
 
-        public static bool IsWirePrimitive(this Type type)
+        public static bool IsHyperionPrimitive(this Type type)
         {
             return type == Int32Type ||
                    type == Int64Type ||
@@ -61,6 +55,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
                    type == ByteType ||
                    type == SByteType ||
                    type == DateTimeType ||
+                   type == DateTimeOffsetType ||
                    type == BoolType ||
                    type == StringType ||
                    type == GuidType ||
@@ -71,27 +66,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             //add TypeSerializer with null support
         }
 
-#if !NET461
-        //HACK: the GetUnitializedObject actually exists in .NET Core, its just not public
-        private static readonly Func<Type, object> getUninitializedObjectDelegate = (Func<Type, object>)
-            typeof(string)
-                .GetTypeInfo()
-                .Assembly
-                .GetType("System.Runtime.Serialization.FormatterServices")
-                ?.GetTypeInfo()
-                ?.GetMethod("GetUninitializedObject", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
-                ?.CreateDelegate(typeof(Func<Type, object>));
-
-        public static object GetEmptyObject(this Type type)
-        {
-            return getUninitializedObjectDelegate(type);
-        }
-#else
-        public static object GetEmptyObject(this Type type)
-        {
-            return FormatterServices.GetUninitializedObject(type);
-        }
-#endif
+        public static object GetEmptyObject(this Type type) => System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
 
         public static bool IsOneDimensionalArray(this Type type)
         {
@@ -100,7 +75,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
 
         public static bool IsOneDimensionalPrimitiveArray(this Type type)
         {
-            return type.IsArray && type.GetArrayRank() == 1 && type.GetElementType().IsWirePrimitive();
+            return type.IsArray && type.GetArrayRank() == 1 && type.GetElementType().IsHyperionPrimitive();
         }
 
         private static readonly ConcurrentDictionary<ByteArrayKey, Type> TypeNameLookup =
@@ -126,11 +101,23 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             return TypeNameLookup.GetOrAdd(byteArr, b =>
             {
                 var shortName = StringEx.FromUtf8Bytes(b.Bytes, 0, b.Bytes.Length);
+#if NET45
+                if (shortName.Contains("System.Private.CoreLib,%core%"))
+                {
+                    shortName = shortName.Replace("System.Private.CoreLib,%core%", "mscorlib,%core%");
+                }
+#endif
+#if NETSTANDARD
+                if (shortName.Contains("mscorlib,%core%"))
+                {
+                    shortName = shortName.Replace("mscorlib,%core%", "System.Private.CoreLib,%core%");
+                }
+#endif
+
                 var typename = ToQualifiedAssemblyName(shortName);
                 return Type.GetType(typename, true);
             });
         }
-
         public static Type GetTypeFromManifestFull(Stream stream, DeserializerSession session)
         {
             var type = GetTypeFromManifestName(stream, session);
@@ -146,6 +133,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             for (var i = 0; i < fieldCount; i++)
             {
                 var fieldName = stream.ReadLengthEncodedByteArray(session);
+
             }
 
             session.TrackDeserializedTypeWithVersion(type, null);
@@ -154,6 +142,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
 
         public static Type GetTypeFromManifestIndex(int typeId, DeserializerSession session)
         {
+
             var type = session.GetTypeFromTypeId(typeId);
             return type;
         }
@@ -183,37 +172,21 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         public static int GetTypeSize(this Type type)
         {
             if (type == Int16Type)
-            {
                 return sizeof(short);
-            }
             if (type == Int32Type)
-            {
                 return sizeof(int);
-            }
             if (type == Int64Type)
-            {
                 return sizeof(long);
-            }
             if (type == BoolType)
-            {
                 return sizeof(bool);
-            }
             if (type == UInt16Type)
-            {
                 return sizeof(ushort);
-            }
             if (type == UInt32Type)
-            {
                 return sizeof(uint);
-            }
             if (type == UInt64Type)
-            {
                 return sizeof(ulong);
-            }
             if (type == CharType)
-            {
                 return sizeof(char);
-            }
 
             throw new NotSupportedException();
         }
@@ -249,12 +222,16 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             return name;
         }
 
+        internal static readonly Regex CleanRegex 
+            = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=[\w-]+, PublicKeyToken=(?:null|[a-f0-9]{16})$", RegexOptions.Compiled);
+
+        const string VERSION_REGEX = @", Version=(\d+([.]\d+)?([.]\d+)?([.]\d+)?.*?)";
+
         static string ReplaceVersion(string input)
         {
             var regex = new Regex(VERSION_REGEX);
             return regex.Replace(input, "");
         }
-
 
         /// <summary>
         /// Search for a method by name, parameter types, and binding flags.  
@@ -367,7 +344,6 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
             }
 
             return false;
-
         }
     }
 }

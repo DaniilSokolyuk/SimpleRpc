@@ -1,24 +1,27 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="StringSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="StringSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class StringSerializer : ValueSerializer
+    internal sealed class StringSerializer : ValueSerializer
     {
         public const byte Manifest = 7;
         public static readonly StringSerializer Instance = new StringSerializer();
 
         public static void WriteValueImpl(Stream stream, string s, SerializerSession session)
         {
-            var bytes = NoAllocBitConverter.GetBytes(s, session, out int byteCount);
+            int byteCount;
+            var bytes = NoAllocBitConverter.GetBytes(s, session, out byteCount);
             stream.Write(bytes, 0, byteCount);
         }
 

@@ -1,35 +1,32 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ReflectionEx.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ReflectionEx.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-#if NET461
-
-#endif
-
 namespace SimpleRpc.Serialization.Wire.Library.Extensions
 {
-    public static class BindingFlagsEx
+    internal static class BindingFlagsEx
     {
         public const BindingFlags All = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
     }
 
-    public static class ReflectionEx
+    internal static class ReflectionEx
     {
         public static readonly Assembly CoreAssembly = typeof(int).GetTypeInfo().Assembly;
 
         public static FieldInfo[] GetFieldInfosForType(this Type type)
         {
             if (type == null)
-            {
                 throw new ArgumentNullException(nameof(type));
-            }
 
             var fieldInfos = new List<FieldInfo>();
             var current = type;
@@ -39,9 +36,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
                     current
                         .GetTypeInfo()
                         .GetFields(BindingFlagsEx.All)
-#if NET461
+#if SERIALIZATION
                         .Where(f => !f.IsDefined(typeof(NonSerializedAttribute)))
 #endif
+                        .Where(f => !f.IsDefined(typeof(IgnoreAttribute)))
                         .Where(f => !f.IsStatic)
                         .Where(f => f.FieldType != typeof(IntPtr))
                         .Where(f => f.FieldType != typeof(UIntPtr))

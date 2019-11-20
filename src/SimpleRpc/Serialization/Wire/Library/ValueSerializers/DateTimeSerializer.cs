@@ -1,16 +1,18 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="DateTimeSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="DateTimeSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class DateTimeSerializer : SessionAwareByteArrayRequiringValueSerializer<DateTime>
+    internal sealed class DateTimeSerializer : SessionAwareByteArrayRequiringValueSerializer<DateTime>
     {
         public const byte Manifest = 5;
         public const int Size = sizeof(long) + sizeof(byte);
@@ -19,8 +21,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         public DateTimeSerializer() : base(Manifest, () => WriteValueImpl, () => ReadValueImpl)
         {
         }
-
-        public override int PreallocatedByteBufferSize => Size;
 
         private static void WriteValueImpl(Stream stream, DateTime dateTime, byte[] bytes)
         {
@@ -42,5 +42,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             var dateTime = new DateTime(ticks, kind);
             return dateTime;
         }
+
+        public override int PreallocatedByteBufferSize => Size;
     }
 }

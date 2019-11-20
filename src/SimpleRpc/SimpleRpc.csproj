@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
         <Description>A simple and fast contractless RPC library for .NET and .NET Core, over IServiceCollection</Description>
-        <VersionPrefix>0.2.2</VersionPrefix>
+        <VersionPrefix>0.2.3</VersionPrefix>
         <PackageTags>rpc;simplerpc;easyrpc;easy;simple</PackageTags>
         <Authors>Daniil Sokolyuk</Authors>
         <PackageProjectUrl>https://github.com/DaniilSokolyuk/SimpleRpc</PackageProjectUrl>
@@ -33,7 +33,8 @@
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-        <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+        <PackageReference Include="System.Runtime" Version="4.3.1" />
+        <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
@@ -42,5 +43,13 @@
         <Reference Include="Microsoft.CSharp" />
         <Reference Include="System.Net.Http" />
     </ItemGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+        <DefineConstants>$(DefineConstants);NETSTANDARD20</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
+        <DefineConstants>$(DefineConstants);SERIALIZATION;UNSAFE;NET45</DefineConstants>
+    </PropertyGroup>
 
 </Project>

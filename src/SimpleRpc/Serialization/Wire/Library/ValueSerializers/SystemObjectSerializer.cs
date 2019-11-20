@@ -1,19 +1,21 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="SystemObjectSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="SystemObjectSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class SystemObjectSerializer : ValueSerializer
+    internal sealed class SystemObjectSerializer : ValueSerializer
     {
         public const byte Manifest = 1;
         public static SystemObjectSerializer Instance = new SystemObjectSerializer();
-
         public override void WriteManifest(Stream stream, SerializerSession session)
         {
             stream.WriteByte(Manifest);

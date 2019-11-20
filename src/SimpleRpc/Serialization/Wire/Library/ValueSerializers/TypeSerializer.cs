@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="TypeSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="TypeSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -10,14 +13,15 @@ using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class TypeSerializer : ValueSerializer
+    internal sealed class TypeSerializer : ValueSerializer
     {
         public const byte Manifest = 16;
         public static readonly TypeSerializer Instance = new TypeSerializer();
 
         public override void WriteManifest(Stream stream, SerializerSession session)
         {
-            if (session.ShouldWriteTypeManifest(TypeEx.RuntimeType, out ushort typeIdentifier))
+            ushort typeIdentifier;
+            if (session.ShouldWriteTypeManifest(TypeEx.RuntimeType, out typeIdentifier))
             {
                 stream.WriteByte(Manifest);
             }
@@ -36,8 +40,9 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             }
             else
             {
-                var type = (Type) value;
-                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(type, out int existingId))
+                var type = (Type)value;
+                int existingId;
+                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(type, out existingId))
                 {
                     ObjectReferenceSerializer.Instance.WriteManifest(stream, session);
                     ObjectReferenceSerializer.Instance.WriteValue(stream, existingId, session);
@@ -59,9 +64,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         {
             var shortname = stream.ReadString(session);
             if (shortname == null)
-            {
                 return null;
-            }
 
             var name = TypeEx.ToQualifiedAssemblyName(shortname);
             var type = Type.GetType(name, true);

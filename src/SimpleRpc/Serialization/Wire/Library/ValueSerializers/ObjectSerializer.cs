@@ -1,8 +1,11 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="ObjectSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="ObjectSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -22,13 +25,16 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
         private readonly byte[] _manifestWithVersionInfo;
 
         private volatile bool _isInitialized;
-        int _preallocatedBufferSize;
         private ObjectReader _reader;
         private ObjectWriter _writer;
+        int _preallocatedBufferSize;
 
         public ObjectSerializer(Type type)
         {
-            Type = type ?? throw new ArgumentNullException(nameof(type));
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            Type = type;
             //TODO: remove version info
             var typeName = type.GetShortAssemblyQualifiedName();
             // ReSharper disable once PossibleNullReferenceException
@@ -74,11 +80,10 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 
         public Type Type { get; }
 
-        public override int PreallocatedByteBufferSize => _preallocatedBufferSize;
-
         public override void WriteManifest(Stream stream, SerializerSession session)
         {
-            if (session.ShouldWriteTypeManifest(Type, out ushort typeIdentifier))
+            ushort typeIdentifier;
+            if (session.ShouldWriteTypeManifest(Type, out typeIdentifier))
             {
                 session.TrackSerializedType(Type);
 
@@ -109,5 +114,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             _writer = writer;
             _isInitialized = true;
         }
+
+        public override int PreallocatedByteBufferSize => _preallocatedBufferSize;
     }
 }

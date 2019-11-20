@@ -1,19 +1,21 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="Compiler.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//       Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
-//   </copyright>
+//  <copyright file="Compiler.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-    public class Compiler<TDel> : ICompiler<TDel>
+    internal sealed class Compiler<TDel> : ICompiler<TDel>
     {
         private readonly List<Expression> _content = new List<Expression>();
         private readonly List<Expression> _expressions = new List<Expression>();
@@ -43,7 +45,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return _expressions.Count - 1;
         }
 
-        public int Variable(string name, Type type)
+        public int Variable(string name,Type type)
         {
             var exp = Expression.Variable(type, name);
             _variables.Add(exp);
@@ -53,13 +55,16 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
 
         public int GetVariable<T>(string name)
         {
-            var existing = _expressions.OfType<ParameterExpression>().First(v => v.Name == name && v.Type == typeof(T));
-            if (existing == null)
+            var t = typeof(T);
+            for (int i = 0; i < _expressions.Count; i++)
             {
-                throw new Exception("Variable not found.");
+                if (_expressions[i] is ParameterExpression parameter && parameter.Name == name && parameter.Type == t)
+                {
+                    return i;
+                }
             }
 
-            return _expressions.IndexOf(existing);
+            throw new Exception("Variable not found.");
         }
 
         public int Constant(object value)
@@ -73,11 +78,11 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         {
             var tempQualifier = _expressions[value];
             var cast = type.GetTypeInfo().IsValueType
-                           // ReSharper disable once AssignNullToNotNullAttribute
-                           ? Expression.Unbox(tempQualifier, type)
-                           // ReSharper disable once AssignNullToNotNullAttribute
-                           : Expression.Convert(tempQualifier, type);
-            var exp = (Expression)cast;
+                // ReSharper disable once AssignNullToNotNullAttribute
+                ? Expression.Unbox(tempQualifier, type)
+                // ReSharper disable once AssignNullToNotNullAttribute
+                : Expression.Convert(tempQualifier, type);
+            var exp = (Expression) cast;
             _expressions.Add(exp);
             return _expressions.Count - 1;
         }
@@ -85,14 +90,14 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public void EmitCall(MethodInfo method, int target, params int[] arguments)
         {
             var targetExp = _expressions[target];
-            var argumentsExp = arguments.Select(n => _expressions[n]).ToArray();
+            var argumentsExp = ArgsToExpr(arguments);
             var call = Expression.Call(targetExp, method, argumentsExp);
             _content.Add(call);
         }
 
         public void EmitStaticCall(MethodInfo method, params int[] arguments)
         {
-            var argumentsExp = arguments.Select(n => _expressions[n]).ToArray();
+            var argumentsExp = ArgsToExpr(arguments);
             var call = Expression.Call(null, method, argumentsExp);
             _content.Add(call);
         }
@@ -100,7 +105,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public int Call(MethodInfo method, int target, params int[] arguments)
         {
             var targetExp = _expressions[target];
-            var argumentsExp = arguments.Select(n => _expressions[n]).ToArray();
+            var argumentsExp = ArgsToExpr(arguments);
             var call = Expression.Call(targetExp, method, argumentsExp);
             _expressions.Add(call);
             return _expressions.Count - 1;
@@ -108,7 +113,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
 
         public int StaticCall(MethodInfo method, params int[] arguments)
         {
-            var argumentsExp = arguments.Select(n => _expressions[n]).ToArray();
+            var argumentsExp = ArgsToExpr(arguments);
             var call = Expression.Call(null, method, argumentsExp);
             _expressions.Add(call);
             return _expressions.Count - 1;
@@ -122,8 +127,17 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return _expressions.Count - 1;
         }
 
-        public int WriteField(FieldInfo field, int typedTarget, int value)
+        public int WriteField(FieldInfo field, int typedTarget, int target, int value)
         {
+            if (field.IsInitOnly)
+            {
+                //TODO: field is readonly, can we set it via IL or only via reflection
+                var method = typeof(FieldInfo).GetTypeInfo()
+                    .GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
+                var fld = Constant(field);
+                var valueToObject = Convert<object>(value);
+                return Call(method, fld, target, valueToObject); 
+            }
             var targetExp = _expressions[typedTarget];
             var valueExp = _expressions[value];
             var accessExp = Expression.Field(targetExp, field);
@@ -132,14 +146,14 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return _expressions.Count - 1;
         }
 
-        public int WriteReadonlyField(FieldInfo field, int target, int value)
+        public Expression ToBlock()
         {
-            var method = typeof(FieldInfo).GetTypeInfo()
-                                          .GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
-            var fld = Constant(field);
-            var valueToObject = Convert<object>(value);
-            return Call(method, fld, target, valueToObject);
+            if (_content.Count == 0)
+            {
+                _content.Add(Expression.Empty());
+            }
 
+            return Expression.Block(_variables.ToArray(), _content);
         }
 
         public TDel Compile()
@@ -153,7 +167,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public int Convert<T>(int value)
         {
             var valueExp = _expressions[value];
-            var con = (Expression)Expression.Convert(valueExp, typeof(T));
+            var con = (Expression) Expression.Convert(valueExp, typeof(T));
             _expressions.Add(con);
             return _expressions.Count - 1;
         }
@@ -176,19 +190,22 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public int Convert(int value, Type type)
         {
             var valueExp = _expressions[value];
-            var conv = (Expression)Expression.Convert(valueExp, type);
+            var conv = (Expression) Expression.Convert(valueExp, type);
             _expressions.Add(conv);
             return _expressions.Count - 1;
         }
 
-        public Expression ToBlock()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Expression[] ArgsToExpr(int[] arguments)
         {
-            if (!_content.Any())
+            var result = new Expression[arguments.Length];
+            var i = 0;
+            foreach (var n in arguments)
             {
-                _content.Add(Expression.Empty());
+                result[i] = _expressions[n];
+                i++;
             }
-
-            return Expression.Block(_variables.ToArray(), _content);
+            return result;
         }
     }
 }

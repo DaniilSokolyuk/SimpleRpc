@@ -12,6 +12,7 @@ namespace SimpleRpc.Sample.Client
     {
         static async Task Main(string[] args)
         {
+            Console.ReadKey();
             var sc = new ServiceCollection();
 
             sc.AddSimpleRpcClient("sample", new HttpClientTransportOptions

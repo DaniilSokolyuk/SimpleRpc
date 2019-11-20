@@ -1,15 +1,17 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="Serializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="Serializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using SimpleRpc.Serialization.Wire.Library.Compilation;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.Internal;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
@@ -27,8 +29,9 @@ namespace SimpleRpc.Serialization.Wire.Library
 
         private readonly ConcurrentDictionary<Type, ValueSerializer> _serializers =
             new ConcurrentDictionary<Type, ValueSerializer>();
-
+        
         public readonly ICodeGenerator CodeGenerator = new DefaultCodeGenerator();
+        
         public readonly SerializerOptions Options;
 
         public Serializer() : this(new SerializerOptions())
@@ -55,7 +58,7 @@ namespace SimpleRpc.Serialization.Wire.Library
             _deserializerLookup[StringSerializer.Manifest] = StringSerializer.Instance;
             _deserializerLookup[Int32Serializer.Manifest] = Int32Serializer.Instance;
             _deserializerLookup[ByteArraySerializer.Manifest] = ByteArraySerializer.Instance;
-            //10 not yet used
+            _deserializerLookup[DateTimeOffsetSerializer.Manifest] = DateTimeOffsetSerializer.Instance;
             _deserializerLookup[GuidSerializer.Manifest] = GuidSerializer.Instance;
             _deserializerLookup[FloatSerializer.Manifest] = FloatSerializer.Instance;
             _deserializerLookup[DoubleSerializer.Manifest] = DoubleSerializer.Instance;
@@ -93,6 +96,7 @@ namespace SimpleRpc.Serialization.Wire.Library
             AddValueSerializer<char>(CharSerializer.Instance);
             AddValueSerializer<byte[]>(ByteArraySerializer.Instance);
             AddValueSerializer<DateTime>(DateTimeSerializer.Instance);
+            AddValueSerializer<DateTimeOffset>(DateTimeOffsetSerializer.Instance);
 
             AddValueSerializer<Type>(TypeSerializer.Instance);
             AddValueSerializer(TypeSerializer.Instance, TypeEx.RuntimeType);
@@ -111,12 +115,9 @@ namespace SimpleRpc.Serialization.Wire.Library
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ValueSerializer GetCustomDeserializer([NotNull] Type type)
         {
-
             //do we already have a deserializer for this type?
-            if (_deserializers.TryGetValue(type, out ValueSerializer serializer))
-            {
+            if (_deserializers.TryGetValue(type, out var serializer))
                 return serializer;
-            }
 
             //is there a deserializer factory that can handle this type?
             foreach (var valueSerializerFactory in Options.ValueSerializerFactories)
@@ -130,10 +131,7 @@ namespace SimpleRpc.Serialization.Wire.Library
             //none of the above, lets create a POCO object deserializer
             serializer = new ObjectSerializer(type);
             //add it to the serializer lookup in case of recursive serialization
-            if (!_deserializers.TryAdd(type, serializer))
-            {
-                return _deserializers[type];
-            }
+            if (!_deserializers.TryAdd(type, serializer)) return _deserializers[type];
             //build the serializer IL code
             CodeGenerator.BuildSerializer(this, (ObjectSerializer) serializer);
             return serializer;
@@ -144,9 +142,7 @@ namespace SimpleRpc.Serialization.Wire.Library
         public void Serialize(object obj, [NotNull] Stream stream, SerializerSession session)
         {
             if (obj == null)
-            {
                 throw new ArgumentNullException(nameof(obj));
-            }
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
@@ -157,10 +153,8 @@ namespace SimpleRpc.Serialization.Wire.Library
         public void Serialize(object obj, [NotNull] Stream stream)
         {
             if (obj == null)
-            {
                 throw new ArgumentNullException(nameof(obj));
-            }
-            var session = GetSerializerSession();
+            SerializerSession session = GetSerializerSession();
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
@@ -175,9 +169,9 @@ namespace SimpleRpc.Serialization.Wire.Library
 
         public T Deserialize<T>([NotNull] Stream stream)
         {
-            var session = GetDeserializerSession();
+            DeserializerSession session = GetDeserializerSession();
             var s = GetDeserializerByManifest(stream, session);
-            return (T) s.ReadValue(stream, session);
+            return (T)s.ReadValue(stream, session);
         }
 
         public DeserializerSession GetDeserializerSession()
@@ -188,7 +182,7 @@ namespace SimpleRpc.Serialization.Wire.Library
         public T Deserialize<T>([NotNull] Stream stream, DeserializerSession session)
         {
             var s = GetDeserializerByManifest(stream, session);
-            return (T) s.ReadValue(stream, session);
+            return (T)s.ReadValue(stream, session);
         }
 
         public object Deserialize([NotNull] Stream stream)
@@ -206,12 +200,9 @@ namespace SimpleRpc.Serialization.Wire.Library
 
         public ValueSerializer GetSerializerByType([NotNull] Type type)
         {
-
             //do we already have a serializer for this type?
-            if (_serializers.TryGetValue(type, out ValueSerializer serializer))
-            {
+            if (_serializers.TryGetValue(type, out var serializer))
                 return serializer;
-            }
 
             //is there a serializer factory that can handle this type?
             foreach (var valueSerializerFactory in Options.ValueSerializerFactories)
@@ -224,13 +215,14 @@ namespace SimpleRpc.Serialization.Wire.Library
 
             //none of the above, lets create a POCO object serializer
             serializer = new ObjectSerializer(type);
-            if (Options.KnownTypesDict.TryGetValue(type, out ushort index))
+            if (Options.KnownTypesDict.TryGetValue(type, out var index))
             {
-                var wrapper = new KnownTypeObjectSerializer((ObjectSerializer)serializer, index);
+                var wrapper = new KnownTypeObjectSerializer((ObjectSerializer) serializer, index);
                 if (!_serializers.TryAdd(type, wrapper))
-                {
                     return _serializers[type];
-                }
+
+
+                
 
                 try
                 {
@@ -239,7 +231,7 @@ namespace SimpleRpc.Serialization.Wire.Library
                 }
                 catch (Exception exp)
                 {
-                    var invalidSerializer = new UnsupportedTypeSerializer(type, exp.Message);
+                    var invalidSerializer = new UnsupportedTypeSerializer(type,exp.Message);
                     _serializers[type] = invalidSerializer;
                     return invalidSerializer;
                 }
@@ -247,18 +239,19 @@ namespace SimpleRpc.Serialization.Wire.Library
                 return wrapper;
             }
             if (!_serializers.TryAdd(type, serializer))
-            {
                 return _serializers[type];
-            }
+
+
 
             try
             {
                 //build the serializer IL code
-                CodeGenerator.BuildSerializer(this, (ObjectSerializer) serializer);
+                CodeGenerator.BuildSerializer(this, (ObjectSerializer)serializer);
+
             }
-            catch (Exception exp)
+            catch(Exception exp)
             {
-                var invalidSerializer = new UnsupportedTypeSerializer(type, exp.Message);
+                var invalidSerializer = new UnsupportedTypeSerializer(type,exp.Message);
                 _serializers[type] = invalidSerializer;
                 return invalidSerializer;
             }
@@ -273,10 +266,7 @@ namespace SimpleRpc.Serialization.Wire.Library
         public ValueSerializer GetDeserializerByManifest([NotNull] Stream stream, [NotNull] DeserializerSession session)
         {
             var first = stream.ReadByte();
-            if (first <= 250)
-            {
-                return _deserializerLookup[first];
-            }
+            if (first <= 250) return _deserializerLookup[first];
             switch (first)
             {
                 case ConsistentArraySerializer.Manifest:

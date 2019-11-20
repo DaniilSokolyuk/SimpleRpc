@@ -1,11 +1,12 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="IlBuilder.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//       Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
-//   </copyright>
+//  <copyright file="IlBuilder.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
-#if NET461
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,8 @@ using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-
-    public class IlBuilder
+#if NET45
+    internal class IlBuilder
     {
         private readonly List<IlExpression> _expressions = new List<IlExpression>();
         protected List<IlParameter> Parameters { get; } = new List<IlParameter>();
@@ -23,7 +24,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         protected List<object> Constants { get; } = new List<object>();
         protected List<Action<IlCompilerContext>> LazyEmits { get; } = new List<Action<IlCompilerContext>>();
 
-        public int NewObject(System.Type type)
+        public int NewObject(Type type)
         {
             var ctor = type.GetConstructor(new Type[] {});
             // ReSharper disable once PossibleNullReferenceException
@@ -85,10 +86,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
 
         public int Constant(object value)
         {
-            if (value is bool)
+            if (value is bool b)
             {
                 //doing this is faster than storing this as state
-                _expressions.Add(new IlBool((bool) value));
+                _expressions.Add(new IlBool(b));
                 return _expressions.Count - 1;
             }
 
@@ -140,16 +141,9 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return _expressions.Count - 1;
         }
 
-        public int WriteField(FieldInfo field, int typedTarget, int value)
+        public int WriteField(FieldInfo field, int typedTarget, int target, int value)
         {
             var exp = new IlWriteField(field, _expressions[typedTarget], _expressions[value]);
-            _expressions.Add(exp);
-            return _expressions.Count - 1;
-        }
-
-        public int WriteReadonlyField(FieldInfo field, int target, int value)
-        {
-            var exp = new IlWriteField(field, _expressions[target], _expressions[value]);
             _expressions.Add(exp);
             return _expressions.Count - 1;
         }
@@ -187,6 +181,5 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             return _expressions.Count - 1;
         }
     }
-
-}
 #endif
+}

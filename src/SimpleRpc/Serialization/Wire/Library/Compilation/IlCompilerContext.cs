@@ -1,10 +1,12 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="IlCompilerContext.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="IlCompilerContext.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
-#if NET461
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -12,8 +14,8 @@ using System.Text;
 
 namespace SimpleRpc.Serialization.Wire.Library.Compilation
 {
-
-    public class IlCompilerContext
+#if NET45
+    internal sealed class IlCompilerContext
     {
         private int _stackDepth;
 
@@ -25,9 +27,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
 
         public IlEmitter Il { get; }
 
+
         public int StackDepth
         {
-            get => _stackDepth;
+            get { return _stackDepth; }
             set
             {
                 _stackDepth = value;
@@ -41,11 +44,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
         public Type SelfType { get; }
     }
 
-    public class IlEmitter
+    internal sealed class IlEmitter
     {
         private readonly ILGenerator _il;
         private readonly StringBuilder _sb = new StringBuilder();
-
         public IlEmitter(ILGenerator il)
         {
             _il = il;
@@ -62,10 +64,10 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             _il.Emit(opcode);
         }
 
-        public void Emit(OpCode opcode, FieldInfo field)
+        public void Emit(OpCode opcode,FieldInfo field)
         {
             _sb.AppendLine($"{opcode} field {field}");
-            _il.Emit(opcode, field);
+            _il.Emit(opcode,field);
         }
 
         public void Emit(OpCode opcode, ConstructorInfo ctor)
@@ -92,6 +94,5 @@ namespace SimpleRpc.Serialization.Wire.Library.Compilation
             _il.EmitCall(opcode, method, optionalTypes);
         }
     }
-
-}
 #endif
+}

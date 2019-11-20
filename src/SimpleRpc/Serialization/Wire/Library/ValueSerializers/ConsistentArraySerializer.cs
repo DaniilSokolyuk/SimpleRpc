@@ -1,8 +1,11 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="ConsistentArraySerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="ConsistentArraySerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -10,7 +13,7 @@ using SimpleRpc.Serialization.Wire.Library.Extensions;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class ConsistentArraySerializer : ValueSerializer
+    internal sealed class ConsistentArraySerializer : ValueSerializer
     {
         public const byte Manifest = 252;
         public static readonly ConsistentArraySerializer Instance = new ConsistentArraySerializer();
@@ -58,9 +61,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             stream.WriteByte(Manifest);
         }
 
-        // private static void WriteValues<T>(T[] array, Stream stream, Type elementType, ValueSerializer elementSerializer,
-        // private static object ReadValues<T>(Stream stream, DeserializerSession session, bool preserveObjectReferences)
-
         public override void WriteValue(Stream stream, object value, SerializerSession session)
         {
             if (session.Serializer.Options.PreserveObjectReferences)
@@ -71,18 +71,16 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             var elementSerializer = session.Serializer.GetSerializerByType(elementType);
             elementSerializer.WriteManifest(stream, session); //write array element type
             // ReSharper disable once PossibleNullReferenceException
-            //TODO fix this
-            WriteValues((dynamic) value, stream, elementSerializer, session);
+            WriteValues((dynamic)value, stream,elementSerializer,session);
         }
 
-        private static void WriteValues<T>(T[] array, Stream stream, ValueSerializer elementSerializer,
-            SerializerSession session)
+        private static void WriteValues<T>(T[] array, Stream stream, ValueSerializer elementSerializer, SerializerSession session)
         {
-            Int32Serializer.WriteValueImpl(stream, array.Length, session);
+            Int32Serializer.WriteValueImpl(stream,array.Length,session);
             if (typeof(T).IsFixedSizeType())
             {
                 var size = typeof(T).GetTypeSize();
-                var result = new byte[array.Length*size];
+                var result = new byte[array.Length * size];
                 Buffer.BlockCopy(array, 0, result, 0, result.Length);
                 stream.Write(result);
             }
@@ -92,7 +90,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
                 {
                     elementSerializer.WriteValue(stream, value, session);
                 }
-            }
+            }    
         }
     }
 }

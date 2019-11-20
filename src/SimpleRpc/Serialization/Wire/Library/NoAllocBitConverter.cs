@@ -1,24 +1,24 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="NoAllocBitConverter.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="NoAllocBitConverter.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using SimpleRpc.Serialization.Wire.Library.ValueSerializers;
 
-namespace SimpleRpc.Serialization.Wire.Library.Internal
+namespace SimpleRpc.Serialization.Wire.Library
 {
     /// <summary>
-    ///     Provides methods not allocating the byte buffer but using <see cref="SerializerSession.GetBuffer" /> to lease a
-    ///     buffer.
+    /// Provides methods not allocating the byte buffer but using <see cref="SerializerSession.GetBuffer"/> to lease a buffer.
     /// </summary>
-    internal static class NoAllocBitConverter
+    public static class NoAllocBitConverter
     {
-        internal static readonly UTF8Encoding Utf8 = (UTF8Encoding) Encoding.UTF8;
-
         public static void GetBytes(char value, byte[] bytes)
         {
             GetBytes((short) value, bytes);
@@ -27,25 +27,19 @@ namespace SimpleRpc.Serialization.Wire.Library.Internal
         public static unsafe void GetBytes(short value, byte[] bytes)
         {
             fixed (byte* b = bytes)
-            {
-                *(short*) b = value;
-            }
+                *((short*) b) = value;
         }
 
         public static unsafe void GetBytes(int value, byte[] bytes)
         {
             fixed (byte* b = bytes)
-            {
-                *(int*) b = value;
-            }
+                *((int*) b) = value;
         }
 
         public static unsafe void GetBytes(long value, byte[] bytes)
         {
             fixed (byte* b = bytes)
-            {
-                *(long*) b = value;
-            }
+                *((long*) b) = value;
         }
 
         public static void GetBytes(ushort value, byte[] bytes)
@@ -73,6 +67,8 @@ namespace SimpleRpc.Serialization.Wire.Library.Internal
             GetBytes(*(long*) &value, bytes);
         }
 
+        internal static readonly UTF8Encoding Utf8 = (UTF8Encoding) Encoding.UTF8;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe byte[] GetBytes(string str, SerializerSession session, out int byteCount)
         {
@@ -87,7 +83,7 @@ namespace SimpleRpc.Serialization.Wire.Library.Internal
             byteCount = Utf8.GetByteCount(str);
             if (byteCount < 254) //short string
             {
-                var bytes = session.GetBuffer(byteCount + 1);
+                byte[] bytes = session.GetBuffer(byteCount + 1);
                 Utf8.GetBytes(str, 0, str.Length, bytes, 1);
                 bytes[0] = (byte) (byteCount + 1);
                 byteCount += 1;
@@ -95,15 +91,13 @@ namespace SimpleRpc.Serialization.Wire.Library.Internal
             }
             else //long string
             {
-                var bytes = session.GetBuffer(byteCount + 1 + 4);
+                byte[] bytes = session.GetBuffer(byteCount + 1 + 4);
                 Utf8.GetBytes(str, 0, str.Length, bytes, 1 + 4);
                 bytes[0] = 255;
 
 
                 fixed (byte* b = bytes)
-                {
-                    *(int*) (b + 1) = byteCount;
-                }
+                    *((int*) (b+1) ) = byteCount;
 
                 byteCount += 1 + 4;
 
@@ -115,10 +109,18 @@ namespace SimpleRpc.Serialization.Wire.Library.Internal
         {
             //datetime size is 9 ticks + kind
             fixed (byte* b = bytes)
-            {
-                *(long*) b = dateTime.Ticks;
-            }
+                *((long*) b) = dateTime.Ticks;
             bytes[DateTimeSerializer.Size - 1] = (byte) dateTime.Kind;
+        }
+
+        public static unsafe void GetBytes(DateTimeOffset dateTime, byte[] bytes)
+        {
+            //datetimeoffset size is 16 ticks + offset
+            fixed (byte* b = bytes)
+            {
+                *((long*)b) = dateTime.Ticks;
+                *((long*)(b + sizeof(long))) = (long)dateTime.Offset.Ticks;
+            }
         }
     }
 }

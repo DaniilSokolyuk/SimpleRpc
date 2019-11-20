@@ -1,14 +1,17 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ByteSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ByteSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System.IO;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class ByteSerializer : SessionIgnorantValueSerializer<byte>
+    internal sealed class ByteSerializer : SessionIgnorantValueSerializer<byte>
     {
         public const byte Manifest = 4;
         public static readonly ByteSerializer Instance = new ByteSerializer();

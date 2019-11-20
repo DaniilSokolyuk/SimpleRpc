@@ -1,17 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\SimpleRpc\SimpleRpc.csproj" />
-    <ProjectReference Include="..\SimpleRpc.Sample.Shared\SimpleRpc.Sample.Shared.csproj" />
-  </ItemGroup>
-
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\SimpleRpc\SimpleRpc.csproj" />
+        <ProjectReference Include="..\SimpleRpc.Sample.Shared\SimpleRpc.Sample.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

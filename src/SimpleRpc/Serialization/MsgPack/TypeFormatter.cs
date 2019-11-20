@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using MessagePack;
 using MessagePack.Formatters;
+using SimpleRpc.Serialization.Wire.Library;
 using SimpleRpc.Serialization.Wire.Library.Extensions;
 using SimpleRpc.Serialization.Wire.Library.Internal;
 

@@ -1,14 +1,17 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="BoolSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="BoolSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System.IO;
 
 namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
-    public class BoolSerializer : SessionIgnorantValueSerializer<bool>
+    internal sealed class BoolSerializer : SessionIgnorantValueSerializer<bool>
     {
         public const byte Manifest = 6;
         public static readonly BoolSerializer Instance = new BoolSerializer();

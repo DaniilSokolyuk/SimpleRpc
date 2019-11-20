@@ -1,8 +1,11 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="SessionAwareByteArrayRequiringValueSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="SessionAwareByteArrayRequiringValueSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -15,10 +18,10 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
     public abstract class SessionAwareByteArrayRequiringValueSerializer<TElementType> : ValueSerializer
     {
         private readonly byte _manifest;
-        private readonly MethodInfo _read;
-        private readonly Func<Stream, byte[], TElementType> _readCompiled;
         private readonly MethodInfo _write;
         private readonly Action<Stream, object, byte[]> _writeCompiled;
+        private readonly MethodInfo _read;
+        private readonly Func<Stream, byte[], TElementType> _readCompiled;
 
         protected SessionAwareByteArrayRequiringValueSerializer(byte manifest,
             Expression<Func<Action<Stream, TElementType, byte[]>>> writeStaticMethod,
@@ -28,7 +31,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             _write = GetStatic(writeStaticMethod, typeof(void));
             _read = GetStatic(readStaticMethod, typeof(TElementType));
 
-#if NET461
+#if NET45
             var c = new IlCompiler<Action<Stream, object, byte[]>>();
 #else
             var c = new Compiler<Action<Stream, object, byte[]>>();
@@ -42,7 +45,7 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             c.EmitStaticCall(_write, stream, valueTyped, buffer);
 
             _writeCompiled = c.Compile();
-#if NET461
+#if NET45
             var c2 = new IlCompiler<Func<Stream, byte[], TElementType>>();
 #else
             var c2 = new Compiler<Func<Stream, byte[], TElementType>>();

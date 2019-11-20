@@ -1,8 +1,11 @@
-﻿// -----------------------------------------------------------------------
-//   <copyright file="ValueSerializer.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+﻿#region copyright
 // -----------------------------------------------------------------------
+//  <copyright file="ValueSerializer.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
+// -----------------------------------------------------------------------
+#endregion
 
 using System;
 using System.IO;
@@ -15,15 +18,6 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
 {
     public abstract class ValueSerializer
     {
-        /// <summary>
-        ///     Marks a given <see cref="ValueSerializer" /> as one requiring a preallocated byte buffer to perform its operations.
-        ///     The byte[] value will be accessible in <see cref="ValueSerializer.EmitWriteValue" /> and
-        ///     <see cref="ValueSerializer.EmitReadValue" /> in the <see cref="ICompiler{TDel}" /> with
-        ///     <see cref="ICompiler{TDel}.GetVariable{T}" /> under following name
-        ///     <see cref="DefaultCodeGenerator.PreallocatedByteBuffer" />.
-        /// </summary>
-        public virtual int PreallocatedByteBufferSize => 0;
-
         public abstract void WriteManifest([NotNull] Stream stream, [NotNull] SerializerSession session);
         public abstract void WriteValue([NotNull] Stream stream, object value, [NotNull] SerializerSession session);
         public abstract object ReadValue([NotNull] Stream stream, [NotNull] DeserializerSession session);
@@ -48,6 +42,11 @@ namespace SimpleRpc.Serialization.Wire.Library.ValueSerializers
             read = c.Convert(read, field.FieldType);
             return read;
         }
+
+        /// <summary>
+        /// Marks a given <see cref="ValueSerializer"/> as one requiring a preallocated byte buffer to perform its operations. The byte[] value will be accessible in <see cref="ValueSerializer.EmitWriteValue"/> and <see cref="ValueSerializer.EmitReadValue"/> in the <see cref="ICompiler{TDel}"/> with <see cref="ICompiler{TDel}.GetVariable{T}"/> under following name <see cref="DefaultCodeGenerator.PreallocatedByteBuffer"/>.
+        /// </summary>
+        public virtual int PreallocatedByteBufferSize => 0;
 
         protected static MethodInfo GetStatic([NotNull] LambdaExpression expression, [NotNull] Type expectedReturnType)
         {

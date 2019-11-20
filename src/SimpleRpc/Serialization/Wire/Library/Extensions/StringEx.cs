@@ -1,11 +1,13 @@
+#region copyright
 // -----------------------------------------------------------------------
-//   <copyright file="StringEx.cs" company="Asynkron HB">
-//       Copyright (C) 2015-2017 Asynkron HB All rights reserved
-//   </copyright>
+//  <copyright file="StringEx.cs" company="Akka.NET Team">
+//      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
+//      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
+//  </copyright>
 // -----------------------------------------------------------------------
+#endregion
 
 using System.Runtime.CompilerServices;
-using SimpleRpc.Serialization.Wire.Library.Internal;
 
 namespace SimpleRpc.Serialization.Wire.Library.Extensions
 {
@@ -18,9 +20,9 @@ namespace SimpleRpc.Serialization.Wire.Library.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string FromUtf8Bytes(byte[] bytes, int offset, int count)
+        internal static string FromUtf8Bytes(byte[] bytes,int offset, int count)
         {
-            return NoAllocBitConverter.Utf8.GetString(bytes, offset, count);
+            return NoAllocBitConverter.Utf8.GetString(bytes,offset,count);
         }
     }
 }
